@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Deep Learning From Scratch III: Training criterion</title>
+    <title>Deep Learning From Scratch III: Training Criterion — Daniel Sabinasz</title>
     <meta name="description"
           content="This is part 3 of a series of tutorials, in which we develop the mathematical and algorithmic underpinnings of deep neural networks from scratch and implement our own neural network library in Python.">
     <link rel="stylesheet" href="../styles.css">
@@ -51,20 +51,20 @@
 
     <article>
         <header class="doc-header">
-            <h1>Deep Learning From Scratch III: Training criterion</h1>
+            <h1>Deep Learning From Scratch III: Training Criterion</h1>
             <div class="doc-meta">
-                Living Document · Version 1.0 · last revised 26 Aug 2017
+                Tutorial · 26 Aug 2017
             </div>
         </header>
 
         <p>This is part 3 of a series of tutorials, in which we develop the mathematical and algorithmic underpinnings
-            of deep neural networks from scratch and implement our own neural network library in Python, mimicing the <a
-                    href="http://www.tensorflow.org">TensorFlow</a> API. Start with the first part: <a
+            of deep neural networks from scratch and implement our own neural network library in Python, mimicking the <a
+                    href="https://www.tensorflow.org">TensorFlow</a> API. Start with the first part: <a
                     href="/deep-learning-from-scratch-i-computational-graphs/">I: Computational Graphs</a>.</p>
         <ul>
             <li><a href="/deep-learning-from-scratch-i-computational-graphs/">Part I: Computational Graphs</a></li>
             <li><a href="/deep-learning-from-scratch-ii-perceptrons/">Part II: Perceptrons</a></li>
-            <li><a href="/deep-learning-from-scratch-iii-training-criterion/">Part III: Training criterion</a></li>
+            <li><a href="/deep-learning-from-scratch-iii-training-criterion/">Part III: Training Criterion</a></li>
             <li><a href="/deep-learning-from-scratch-iv-gradient-descent-and-backpropagation/">Part IV: Gradient Descent
                 and Backpropagation</a></li>
             <li><a href="/deep-learning-from-scratch-v-multi-layer-perceptrons/">Part V: Multi-Layer Perceptrons</a>
@@ -72,7 +72,7 @@
             <li><a href="/deep-learning-from-scratch-vi-tensorflow/">Part VI: TensorFlow</a></li>
         </ul>
 
-        <h1 id="Training-criterion">Training criterion</h1>
+        <h2 id="Training-criterion">Training criterion</h2>
         <p>Great, so now we are able to classify points using a linear classifier and compute the probability that the
             point belongs to a certain class, provided that we know the appropriate parameters for the weight matrix $W$
             and bias $b$. The natural question that arises is how to come up with appropriate values for these. In the
@@ -139,7 +139,7 @@
             <li>$\sum_{i=1}^N$: Sum over the rows of a matrix</li>
             <li>$-$: Taking the negative</li>
         </ul>
-        <p>Let's implement these operations.</p>
+        <p>Let’s implement these operations.</p>
         <h3 id="log">log</h3>
         <p>This computes the element-wise logarithm of a tensor.
         </p>
@@ -190,7 +190,7 @@
         return x_value * y_value</code></pre>
 
         <h3 id="reduce_sum">reduce_sum</h3>
-        <p>We'll implement the summation over rows, columns, etc. in a single operation where we specify an
+        <p>We’ll implement the summation over rows, columns, etc. in a single operation where we specify an
             <code>axis</code>. This way, we can use the same method for all types of summations. For example, <code>axis
                 = 0</code> sums over the rows, <code>axis = 1</code> sums over the columns, etc. This is exactly what
             <code>numpy.sum</code> does.<br/>
@@ -246,7 +246,7 @@
         <pre><code>J = negative(reduce_sum(reduce_sum(multiply(c, log(p)), axis=1)))</code></pre>
 
         <h3 id="Example">Example</h3>
-        <p>Let's now compute the loss of our red/blue perceptron.
+        <p>Let’s now compute the loss of our red/blue perceptron.
         </p>
         <pre><code class="language-python"># Create a new graph
 Graph().as_default()

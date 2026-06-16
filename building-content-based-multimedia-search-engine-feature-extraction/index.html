@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Building a Content-Based Multimedia Search Engine II: Extracting Feature Vectors</title>
+    <title>Building a Content-Based Multimedia Search Engine II: Extracting Feature Vectors — Daniel Sabinasz</title>
     <meta name="description"
           content="This is part 2 in a series of tutorials in which we learn how to build a content-based search engine that retrieves multimedia objects based on their content rather than based on keywords, title or meta description.">
     <link rel="stylesheet" href="../styles.css">
@@ -26,7 +26,7 @@
         <header class="doc-header">
             <h1>Building a Content-Based Multimedia Search Engine II: Extracting Feature Vectors</h1>
             <div class="doc-meta">
-                Living Document · Version 1.0 · last revised 8 Mar 2018
+                Tutorial · 8 Mar 2018
             </div>
         </header>
 
@@ -41,7 +41,7 @@
                 Feature Vectors</a></li>
             <li><a href="/building-content-based-multimedia-search-engine-feature-signatures/">Part III: Feature
                 Signatures</a></li>
-            <li><a href="/building-content-based-multimedia-search-engine-earth-movers-distance/">Part IV: Earth Mover's
+            <li><a href="/building-content-based-multimedia-search-engine-earth-movers-distance/">Part IV: Earth Mover’s
                 Distance</a></li>
             <li><a href="/building-content-based-multimedia-search-engine-signature-quadratic-form-distance/">Part V:
                 Signature Quadratic Form Distance</a></li>
@@ -66,7 +66,7 @@
         <p>We first select a certain amount of sample frames from the video (e.g. 10 frames per second). For each of
             these frames, we select a fixed amount of equidistant sample pixels. Finally, for each sample pixel, we
             compute an 8-dimensional Euclidean vector $(x, y, L, a, b, \chi, \eta, t)$ describing the visual appearance
-            of the pixel and its context. The choice of this vector is just a suggestion and it isn't necessary to
+            of the pixel and its context. The choice of this vector is just a suggestion and it isn’t necessary to
             include all of features presented here.</p>
 
         <p>The first two dimensions of this vector correspond to the x and y coordinates of the pixel inside the frame.
@@ -109,7 +109,7 @@
             between two videos more efficiently. Continue with the next section: <a
                     href="/building-content-based-search-engine-feature-signatures/">Feature Signatures</a></p>
         <h2>References</h2>
-        <p>[Wik15b] Wikipedia. <em>Lab color space</em> <a href="http://en.wikipedia.org/wiki/Lab_color_space">http://en.wikipedia.org/wiki/Lab_color_space</a>,
+        <p>[Wik15b] Wikipedia. <em>Lab color space</em> <a href="https://en.wikipedia.org/wiki/Lab_color_space">https://en.wikipedia.org/wiki/Lab_color_space</a>,
             2015.<br/>[TMY78] Hideyuki Tamura, Shunji Mori, and Takashi Yamawaki. <em>Textural features corresponding to
                 visual perception.</em> IEEE Transactions on Systems, Man and Cybernetics, 8(6):460&ndash;473,
             1978.<br/>[BUS10a]&nbsp;Christian Beecks, Merih Seran Uysal, and Thomas Seidl. <em>A comparative study of

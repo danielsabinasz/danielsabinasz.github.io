@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Deep Learning From Scratch IV: Gradient Descent and Backpropagation</title>
+    <title>Deep Learning From Scratch IV: Gradient Descent and Backpropagation — Daniel Sabinasz</title>
     <meta name="description"
           content="This is part 4 of a series of tutorials, in which we develop the mathematical and algorithmic underpinnings of deep neural networks from scratch and implement our own neural network library in Python.">
     <link rel="stylesheet" href="../styles.css">
@@ -53,18 +53,18 @@
         <header class="doc-header">
             <h1>Deep Learning From Scratch IV: Gradient Descent and Backpropagation</h1>
             <div class="doc-meta">
-                Living Document · Version 1.0 · last revised 26 Aug 2017
+                Tutorial · 26 Aug 2017
             </div>
         </header>
 
         <p>This is part 4 of a series of tutorials, in which we develop the mathematical and algorithmic underpinnings
-            of deep neural networks from scratch and implement our own neural network library in Python, mimicing the <a
-                    href="http://www.tensorflow.org">TensorFlow</a> API.&nbsp;Start with the first part: <a
+            of deep neural networks from scratch and implement our own neural network library in Python, mimicking the <a
+                    href="https://www.tensorflow.org">TensorFlow</a> API.&nbsp;Start with the first part: <a
                     href="/deep-learning-from-scratch-i-computational-graphs/">I: Computational Graphs</a>.</p>
         <ul>
             <li><a href="/deep-learning-from-scratch-i-computational-graphs/">Part I: Computational Graphs</a></li>
             <li><a href="/deep-learning-from-scratch-ii-perceptrons/">Part II: Perceptrons</a></li>
-            <li><a href="/deep-learning-from-scratch-iii-training-criterion/">Part III: Training criterion</a></li>
+            <li><a href="/deep-learning-from-scratch-iii-training-criterion/">Part III: Training Criterion</a></li>
             <li><a href="/deep-learning-from-scratch-iv-gradient-descent-and-backpropagation/">Part IV: Gradient Descent
                 and Backpropagation</a></li>
             <li><a href="/deep-learning-from-scratch-v-multi-layer-perceptrons/">Part V: Multi-Layer Perceptrons</a>
@@ -72,7 +72,7 @@
             <li><a href="/deep-learning-from-scratch-vi-tensorflow/">Part VI: TensorFlow</a></li>
         </ul>
 
-        <h1 id="Gradient-descent">Gradient descent</h1>
+        <h2 id="Gradient-descent">Gradient descent</h2>
         <p>Generally, if we want to find the minimum of a function, we set the derivative to zero and solve for the
             parameters. It turns out, however, that it is impossible to obtain a closed-form solution for $W$ and $b$.
             Instead, we iteratively search for a minimum using a method called <strong>gradient descent</strong>.</p>
@@ -96,7 +96,7 @@
             <li>Take a small step along the direction of the negative gradient</li>
             <li>Go back to 2</li>
         </ol>
-        <p>Let's implement an operation that minimizes the value of a node using gradient descent. We require the user
+        <p>Let’s implement an operation that minimizes the value of a node using gradient descent. We require the user
             to specify the magnitude of the step along the gradient as a parameter called <code>learning_rate</code>.
         </p>
         <pre><code class="language-python">from queue import Queue
@@ -128,7 +128,7 @@ class GradientDescentOptimizer:
             line (marked as 1), take a step, arrive at a slightly better line (marked as 2), take another step, and
             another step, and so on until we arrive at a good separating line.</p>
         <p style="text-align:center;"><img class="aligncenter" src="gradient_descent_3.png" alt="" style="max-width:50%;"/></p>
-        <h1 id="Backpropagation">Backpropagation</h1>
+        <h2 id="Backpropagation">Backpropagation</h2>
         <p>In our implementation of gradient descent, we have used a function <code>compute_gradient(loss)</code> that
             computes the gradient of a $loss$ operation in our computational graph with respect to the output of every
             other node $n$ (i.e. the direction of change for $n$ along which the loss increases the most). We now need
@@ -141,7 +141,7 @@ class GradientDescentOptimizer:
             \frac{\partial e}{\partial d} \cdot \frac{\partial d}{\partial c} \cdot \frac{\partial c}{\partial b} \cdot
             \frac{\partial b}{\partial a}$$</p>
         <p>As we can see, in order to compute the gradient of $e$ with respect to $a$, we can start at $e$ an go
-            backwards towards $a$, computing the gradient of every node's output with respect to its input along the way
+            backwards towards $a$, computing the gradient of every node’s output with respect to its input along the way
             until we reach $a$. Then, we multiply them all together.</p>
         <p>Now consider the following scenario:</p>
         <p style="text-align:center;"><img class="aligncenter" src="abcde2.png" alt="" style="max-width:50%;"/></p>
@@ -166,7 +166,7 @@ class GradientDescentOptimizer:
         <p>And then we sum those gradients over all consumers.</p>
         <p>As a prerequisite to implementing backpropagation, we need to specify a function for each operation that
             computes the gradients with respect to the inputs of that operation, given the gradients with respect to the
-            output. Let's define a decorator <code>@RegisterGradient(operation_name)</code> for this purpose:</p>
+            output. Let’s define a decorator <code>@RegisterGradient(operation_name)</code> for this purpose:</p>
         <pre><code class="language-python"># A dictionary that will map operations to gradient functions
 _gradient_registry = {}
 
@@ -193,7 +193,7 @@ class RegisterGradient:
 
 
 def compute_gradients(loss):
-    # grad_table[node] will contain the gradient of the loss w.r.t. the node's output
+    # grad_table[node] will contain the gradient of the loss w.r.t. the node’s output
     grad_table = {}
 
     # The gradient of the loss with respect to the loss is just 1
@@ -211,22 +211,22 @@ def compute_gradients(loss):
         # If this node is not the loss
         if node != loss:
             #
-            # Compute the gradient of the loss with respect to this node's output
+            # Compute the gradient of the loss with respect to this node’s output
             #
             grad_table[node] = 0
 
             # Iterate all consumers
             for consumer in node.consumers:
 
-                # Retrieve the gradient of the loss w.r.t. consumer's output
+                # Retrieve the gradient of the loss w.r.t. consumer’s output
                 lossgrad_wrt_consumer_output = grad_table[consumer]
 
                 # Retrieve the function which computes gradients with respect to
-                # consumer's inputs given gradients with respect to consumer's output.
+                # consumer’s inputs given gradients with respect to consumer’s output.
                 consumer_op_type = consumer.__class__
                 bprop = _gradient_registry[consumer_op_type]
 
-                # Get the gradient of the loss with respect to all of consumer's inputs
+                # Get the gradient of the loss with respect to all of consumer’s inputs
                 lossgrads_wrt_consumer_inputs = bprop(consumer, lossgrad_wrt_consumer_output)
 
                 if len(consumer.input_nodes) == 1:
@@ -236,7 +236,7 @@ def compute_gradients(loss):
                 else:
                     # Otherwise, lossgrads_wrt_consumer_inputs is an array of gradients for each input node
 
-                    # Retrieve the index of node in consumer's inputs
+                    # Retrieve the index of node in consumer’s inputs
                     node_index_in_consumer_inputs = consumer.input_nodes.index(node)
 
                     # Get the gradient of the loss with respect to node
@@ -259,7 +259,7 @@ def compute_gradients(loss):
 
         <h2 id="Gradient-of-each-operation">Gradient of each operation</h2>
         <p>For each of our operations, we now need to define a function that turns a gradient of the loss with respect
-            to the operation's output into a list of gradients of the loss with respect to each of the operation's
+            to the operation’s output into a list of gradients of the loss with respect to each of the operation’s
             inputs. Computing a gradient with respect to a matrix can be somewhat tedious. Therefore, the details have
             been omitted and I just present the results. You may skip this section and still understand the overall
             picture.</p>
@@ -268,8 +268,8 @@ def compute_gradients(loss):
             <li>Find the partial derivative of each output value with respect to each input value (this can be a tensor
                 of a rank greater than 2, i.e. neither scalar nor vector nor matrix, involving a lot of summations)
             </li>
-            <li>Compute the gradient of the loss with respect to the node's inputs given a gradient with respect to the
-                node's output by applying the chain rule. This is now a tensor of the same shape as the input tensor, so
+            <li>Compute the gradient of the loss with respect to the node’s inputs given a gradient with respect to the
+                node’s output by applying the chain rule. This is now a tensor of the same shape as the input tensor, so
                 if the input is a matrix, the result is also a matrix
             </li>
             <li>Rewrite this result as a sequence of matrix operations in order to compute it efficiently. This step can
@@ -444,7 +444,7 @@ def _softmax_gradient(op, grad):
     )) * softmax</code></pre>
 
         <h2 id="Example">Example</h2>
-        <p>Let's now test our implementation to determine the optimal weights for our perceptron.</p>
+        <p>Let’s now test our implementation to determine the optimal weights for our perceptron.</p>
         <pre><code class="language-python"># Create a new graph
 Graph().as_default()
 
@@ -489,7 +489,7 @@ print("Weight matrix:\n", W_value)
 b_value = session.run(b)
 print("Bias:\n", b_value)</code></pre>
 
-        <p>Notice that we started out with a rather high loss and incrementally reduced it. Let's plot the final line to
+        <p>Notice that we started out with a rather high loss and incrementally reduced it. Let’s plot the final line to
             check that it is a good separator:</p>
         <pre><code class="language-python">W_value =  np.array([[ 1.27496197 -1.77251219], [ 1.11820232 -2.01586474]])
 b_value = np.array([-0.45274057 -0.39071841])

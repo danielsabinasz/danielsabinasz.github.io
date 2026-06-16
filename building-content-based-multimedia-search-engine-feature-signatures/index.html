@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Building a Content-Based Multimedia Search Engine III: Feature Signatures</title>
+    <title>Building a Content-Based Multimedia Search Engine III: Feature Signatures — Daniel Sabinasz</title>
     <meta name="description"
           content="This is part 3 in a series of tutorials in which we learn how to build a content-based search engine that retrieves multimedia objects based on their content rather than based on keywords, title or meta description.">
     <link rel="stylesheet" href="../styles.css">
@@ -26,7 +26,7 @@
         <header class="doc-header">
             <h1>Building a Content-Based Multimedia Search Engine III: Feature Signatures</h1>
             <div class="doc-meta">
-                Living Document · Version 1.0 · last revised 29 Mar 2018
+                Tutorial · 29 Mar 2018
             </div>
         </header>
 
@@ -40,7 +40,7 @@
                 Feature Vectors</a></li>
             <li><a href="/building-content-based-multimedia-search-engine-feature-signatures/">Part III: Feature
                 Signatures</a></li>
-            <li><a href="/building-content-based-multimedia-search-engine-earth-movers-distance/">Part IV: Earth Mover's
+            <li><a href="/building-content-based-multimedia-search-engine-earth-movers-distance/">Part IV: Earth Mover’s
                 Distance</a></li>
             <li><a href="/building-content-based-multimedia-search-engine-signature-quadratic-form-distance/">Part V:
                 Signature Quadratic Form Distance</a></li>
@@ -73,7 +73,7 @@
             centers (depicted as the large red, green and blue dots), which we define as the representatives of the
             feature signature S, and assign them a weight corresponding to the relative cluster size (i.e. the number of
             feature vectors in the cluster divided by the total number of feature vectors).</p>
-        <p>Let's formalize this process. Let $C = C_1, ..., C_m$ be a clustering of feature vectors. We define the
+        <p>Let’s formalize this process. Let $C = C_1, ..., C_m$ be a clustering of feature vectors. We define the
             clustering-induced normalized feature signature $X_C$ as $X_C : \mathbb{F} \rightarrow \mathbb{R}$ with:</p>
         <p>$$<br/>X_C(f)=<br/>\begin{cases}<br/>\frac{|C_i|}{\sum_{1 \leq j \leq m} |C_j|} &amp; \text{if } f =
             \frac{1}{|C_i|} \sum_{g \in C_i} g\\<br/>0 &amp; \text{else}<br/>\end{cases}<br/>$$</p>
@@ -99,7 +99,7 @@
             distribution, since it summarizes how many feature vectors are located at which locations in the feature
             space. In the next section, we will see how we can compute the similarity between two feature signatures.
             Continue with the next section:&nbsp;<a href="/building-content-based-search-engine-earth-movers-distance/">Earth
-                Mover's Distance</a></p>
+                Mover’s Distance</a></p>
 
     </article>
 

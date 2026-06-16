@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Deep Learning From Scratch VI: TensorFlow</title>
+    <title>Deep Learning From Scratch VI: TensorFlow — Daniel Sabinasz</title>
     <meta name="description"
           content="This is part 6 of a series of tutorials, in which we develop the mathematical and algorithmic underpinnings of deep neural networks from scratch and implement our own neural network library in Python.">
     <link rel="stylesheet" href="../styles.css">
@@ -53,22 +53,22 @@
         <header class="doc-header">
             <h1>Deep Learning From Scratch VI: TensorFlow</h1>
             <div class="doc-meta">
-                Living Document · Version 1.0 · last revised 16 Jun 2026
+                Tutorial · 9 Nov 2017
             </div>
         </header>
 
-        <p>This is part 6 of a series of tutorials, in which we develop the mathematical and algorithmic underpinnings of deep neural networks from scratch and implement our own neural network library in Python, mimicing the <a href="http://www.tensorflow.org">TensorFlow</a> API.&nbsp;Start with the first part: <a href="/deep-learning-from-scratch-i-computational-graphs/">I: Computational Graphs</a>.</p>
+        <p>This is part 6 of a series of tutorials, in which we develop the mathematical and algorithmic underpinnings of deep neural networks from scratch and implement our own neural network library in Python, mimicking the <a href="https://www.tensorflow.org">TensorFlow</a> API.&nbsp;Start with the first part: <a href="/deep-learning-from-scratch-i-computational-graphs/">I: Computational Graphs</a>.</p>
         <ul>
             <li><a href="/deep-learning-from-scratch-i-computational-graphs/">Part I: Computational Graphs</a></li>
             <li><a href="/deep-learning-from-scratch-ii-perceptrons/">Part II: Perceptrons</a></li>
-            <li><a href="/deep-learning-from-scratch-iii-training-criterion/">Part III: Training criterion</a></li>
+            <li><a href="/deep-learning-from-scratch-iii-training-criterion/">Part III: Training Criterion</a></li>
             <li><a href="/deep-learning-from-scratch-iv-gradient-descent-and-backpropagation/">Part IV: Gradient Descent and Backpropagation</a></li>
             <li><a href="/deep-learning-from-scratch-v-multi-layer-perceptrons/">Part V: Multi-Layer Perceptrons</a></li>
             <li><a href="/deep-learning-from-scratch-vi-tensorflow/">Part VI: TensorFlow</a></li>
         </ul>
-        <h1>TensorFlow</h1>
+        <h2>TensorFlow</h2>
         <p class="tio-markdown_p">It is now time to say goodbye to our own toy library and start to get professional by switching to the actual TensorFlow.</p>
-        <p class="tio-markdown_p">As we've learned already, TensorFlow conceptually works exactly the same as our implementation. So why not just stick to our own implementation? There are a couple of reasons:</p>
+        <p class="tio-markdown_p">As we’ve learned already, TensorFlow conceptually works exactly the same as our implementation. So why not just stick to our own implementation? There are a couple of reasons:</p>
         <ol class="tio-markdown_ol">
             <li class="tio-markdown_li">
                 <p class="tio-markdown_p">TensorFlow is the product of years of effort in providing efficient implementations for all the algorithms relevant to our purposes. Fortunately, there are experts at Google whose everyday job is to optimize these implementations. We do not need to know all of these details. We only have to know what the algorithms do conceptually (which we do now) and how to call them.</p>
@@ -91,7 +91,7 @@
             <strong>Update 2019</strong>: The new TensorFlow 2 has an updated API. If you would like to migrate the example to TensorFlow 2, you can find information on how to do that here: <a href="https://www.tensorflow.org/guide/migrate" target="new" rel="noopener noreferrer">https://www.tensorflow.org/guide/migrate</a>. The text below assumes the outdated TensorFlow 1 API which is highly analogous to the API we built. Perhaps trying to migrate this example code to TensorFlow 2 is precisely the exercise that will get you started with TensorFlow 2.
         </p>
 
-        <p class="tio-markdown_p">So let's get started. Installing TensorFlow is very easy.</p>
+        <p class="tio-markdown_p">So let’s get started. Installing TensorFlow is very easy.</p>
         <pre class="tio-markdown_pre"><code class="tio-markdown_code">pip install tensorflow
 </code></pre>
         <p class="tio-markdown_p">If we want GPU acceleration, we have to install the package&nbsp;<code class="tio-markdown_code">tensorflow-gpu</code>:</p>
@@ -106,7 +106,7 @@
             <li class="tio-markdown_li">Call&nbsp;<code class="tio-markdown_code">session.run(tf.global_variables_initializer())</code>&nbsp;after building the graph</li>
         </ul>
 
-        <p class="tio-markdown_p">The rest is exactly the same. Let's recreate the multi-layer perceptron from the previous section using TensorFlow:</p>
+        <p class="tio-markdown_p">The rest is exactly the same. Let’s recreate the multi-layer perceptron from the previous section using TensorFlow:</p>
 
         <pre><code class="language-python">import tensorflow as tf
 import numpy as np

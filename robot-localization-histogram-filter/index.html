@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Robot Localization II: The Histogram Filter — Daniel Sabinasz</title>
     <meta name="description"
-          content="This is part 2 in a series of articles explaining methods for robot localization, i.e. determining and tracking a robot's location via noisy sensor measurements.">
+          content="This is part 2 in a series of articles explaining methods for robot localization, i.e. determining and tracking a robot’s location via noisy sensor measurements.">
     <link rel="stylesheet" href="../styles.css">
     <script>
         window.MathJax = {
@@ -26,12 +26,12 @@
         <header class="doc-header">
             <h1>Robot Localization II: The Histogram Filter</h1>
             <div class="doc-meta">
-                Living Document · Version 1.0 · last revised 15 Sep 2017
+                Tutorial · 15 Sep 2017
             </div>
         </header>
 
         <p>This is part 2 in a series of articles explaining methods for robot localization, i.e. determining and
-            tracking a robot's location via noisy sensor measurements. You should start with the first part: <a
+            tracking a robot’s location via noisy sensor measurements. You should start with the first part: <a
                     href="/robot-localization-recursive-bayesian-estimation/">Robot Localization I: Recursive Bayesian
                 Estimation</a></p>
         <h3>Idea</h3>
@@ -50,7 +50,7 @@
                 src="img.png" alt=""
                 width="686" height="174"/></p>
         <p>A self-driving car lives in a one-dimensional, cyclic world that is 5 meters wide. By cyclic, we mean that if
-            it is in the rightmost cell and moves one step to the right, it's back in the leftmost cell. The robot&rsquo;s
+            it is in the rightmost cell and moves one step to the right, it’s back in the leftmost cell. The robot&rsquo;s
             position at each time step is given as $pos_t \in [0, 5)$, which is the only state variable. It has a sensor
             that is, under uncertainty, able to tell the color of the wall next to it. We assume that the car is
             constantly moving right under noise, at an expected speed of one meter per time step.</p>
@@ -76,7 +76,7 @@
             P(MeasuredColor_t = Blue \; \vert \; pos_t^\prime = 1, 4) = 0.1\\
             P(MeasuredColor_t = Orange \; \vert \; pos_t^\prime = 1, 4) = 0.9
             \end{align*}$$</p>
-        <p>Let&rsquo;s now use the discrete Bayes filter to calculate the car's belief for three time steps where the
+        <p>Let&rsquo;s now use the discrete Bayes filter to calculate the car’s belief for three time steps where the
             sensor measurements are Orange, Blue and Orange in that order. We assume that the car starts at the very
             left (but it does not know that it does) and travels exactly one grid cell to the right per time step (which
             it does not know either).&nbsp;We can represent the belief as a 5-dimensional row vector $bel(pos_t^\prime)
@@ -92,7 +92,7 @@
             \cdot&nbsp;0.2 + (0.05, 0.0, 0.0, 0.05, 0.9) \cdot&nbsp;0.2$<br/>$+ (0.9, 0.05, 0.0, 0.0, 0.05) \cdot&nbsp;0.2
             = (0.2, 0.2, 0.2, 0.2, 0.2)$</p>
         <p>This results in the same belief as before, which shouldn&rsquo;t surprise us, since each cell was equally
-            likely to be the car's position at time $t = 0$ and therefore, since the robot just moved blindly, each cell
+            likely to be the car’s position at time $t = 0$ and therefore, since the robot just moved blindly, each cell
             is still equally likely to be its position at time $t = 1$.</p>
         <p>Now the robot updates the projected belief with the sensor input:</p>
         <p>$bel(pos_1^\prime) = \eta \cdot P(MeasuredColor_1 = Orange \; \vert \; pos_1^\prime) \cdot

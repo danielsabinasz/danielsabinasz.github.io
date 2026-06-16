@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Building a Content-Based Multimedia Search Engine VI: Efficient Query Processing</title>
+    <title>Building a Content-Based Multimedia Search Engine VI: Efficient Query Processing — Daniel Sabinasz</title>
     <meta name="description"
           content="This is part 6 in a series of tutorials in which we learn how to build a content-based search engine that retrieves multimedia objects based on their content rather than based on keywords, title or meta description.">
     <link rel="stylesheet" href="../styles.css">
@@ -26,7 +26,7 @@
         <header class="doc-header">
             <h1>Building a Content-Based Multimedia Search Engine VI: Efficient Query Processing</h1>
             <div class="doc-meta">
-                Living Document · Version 1.0 · last revised 28 Oct 2018
+                Tutorial · 28 Oct 2018
             </div>
         </header>
 
@@ -40,7 +40,7 @@
                 Feature Vectors</a></li>
             <li><a href="/building-content-based-multimedia-search-engine-feature-signatures/">Part III: Feature
                 Signatures</a></li>
-            <li><a href="/building-content-based-multimedia-search-engine-earth-movers-distance/">Part IV: Earth Mover's
+            <li><a href="/building-content-based-multimedia-search-engine-earth-movers-distance/">Part IV: Earth Mover’s
                 Distance</a></li>
             <li><a href="/building-content-based-multimedia-search-engine-signature-quadratic-form-distance/">Part V:
                 Signature Quadratic Form Distance</a></li>
@@ -91,7 +91,7 @@
         <p>Lower bounds can be devised by exploiting the inner workings of the utilized distance function. There are,
             however, some lower bounds that are generic in nature, i.e. they are applicable to a wide variety of
             distance functions, as long as these distance functions fulfill certain properties. In the following, we
-            present a generic lower bound for metric distance functions and lower bounds for the Earth Mover's
+            present a generic lower bound for metric distance functions and lower bounds for the Earth Mover’s
             Distance.</p>
         <h2>Metric Lower Bound</h2>
         <p>If we are dealing with a metric distance function, we can exploit the fact that the distance fulfills the
@@ -105,7 +105,7 @@
             $\mathcal{O}(|P|)$ efficiently by looking up the stored distance values. The selectivity of this approach is
             highly dependent on the choice of pivot objects $P$ and the distribution of the database objects and the
             query object.</p>
-        <h2>Lower Bounds for the Earth Mover's Distance</h2>
+        <h2>Lower Bounds for the Earth Mover’s Distance</h2>
         <h3>Rubner Lower Bound</h3>
         <p>As shown by Rubner et al. in [RTG00], when using a norm-induced ground distance, the Earth Mover&rsquo;s
             Distance can be lower-bounded by the ground distance between the weighted means of the two signatures.</p>
@@ -140,7 +140,7 @@
                     href="/building-content-based-search-engine-feature-signatures/">Part III: Feature Signatures</a>,
             we have learned how we can summarize a set of feature vectors into a compact representation called a feature
             signature which effectively comprises a compressed summary of the contents of the multimedia object. In&nbsp;<a
-                    href="/building-content-based-search-engine-earth-movers-distance/">Part IV: Earth Mover's
+                    href="/building-content-based-search-engine-earth-movers-distance/">Part IV: Earth Mover’s
                 Distance</a>&nbsp;and&nbsp;<a
                     href="/building-content-based-search-engine-signature-quadratic-form-distance">Part V: Signature
                 Quadratic Form Distance</a>, we have learned about two distance measures on these feature signatures

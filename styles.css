@@ -246,11 +246,53 @@ hr {
   padding: 0.1rem 0.6rem;
   vertical-align: 0.12em;
 }
-.tag.live   { color: #246b4a; }   /* living documents */
-.tag.soft   { color: #2b4a7a; }   /* software         */
-.tag.paper  { color: #6a4a8a; }   /* peer-reviewed papers */
-.tag.thesis { color: #8a6a2a; }   /* theses               */
-.tag.poster { color: #1f6f73; }   /* conference posters   */
+.tag.live     { color: #246b4a; }   /* status: living document */
+.tag.soft     { color: #2b4a7a; }   /* software             */
+.tag.paper    { color: #6a4a8a; }   /* peer-reviewed papers */
+.tag.thesis   { color: #8a6a2a; }   /* theses               */
+.tag.poster   { color: #1f6f73; }   /* conference posters   */
+.tag.essay    { color: #8a3a4a; }   /* essays               */
+.tag.tutorial { color: #a05a28; }   /* tutorials            */
+
+/* --- Tag filter bar ------------------------------------------------------- */
+/* Injected by JavaScript on work.html as a progressive enhancement: where the
+   script does not run, the bar never appears and every entry stays visible.
+   Each button carries its form's colour (via --c), so the bar reads as a
+   legend; the active button fills with that colour. */
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin: 0 0 1.9rem;
+}
+.filter-btn {
+  --c: var(--ink-faint);
+  font-family: var(--sans);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--c);
+  background: transparent;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  padding: 0.22rem 0.7rem;
+  cursor: pointer;
+  transition: color 0.15s, background-color 0.15s, border-color 0.15s;
+}
+.filter-btn.filter-paper    { --c: #6a4a8a; }
+.filter-btn.filter-thesis   { --c: #8a6a2a; }
+.filter-btn.filter-poster   { --c: #1f6f73; }
+.filter-btn.filter-essay    { --c: #8a3a4a; }
+.filter-btn.filter-tutorial { --c: #a05a28; }
+.filter-btn.filter-live     { --c: #246b4a; }
+.filter-btn:hover  { border-color: var(--c); }
+.filter-btn:focus-visible { outline: 2px solid var(--c); outline-offset: 2px; }
+.filter-btn[aria-pressed="true"] {
+  color: var(--paper);
+  background: var(--c);
+  border-color: var(--c);
+}
 
 /* --- Article / document header (sub-pages) -------------------------------- */
 .backlink {

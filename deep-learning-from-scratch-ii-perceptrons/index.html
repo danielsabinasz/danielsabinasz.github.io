@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Deep Learning From Scratch II: Perceptrons</title>
+    <title>Deep Learning From Scratch II: Perceptrons — Daniel Sabinasz</title>
     <meta name="description"
           content="This is part 2 of a series of tutorials, in which we develop the mathematical and algorithmic underpinnings of deep neural networks from scratch and implement our own neural network library in Python.">
     <link rel="stylesheet" href="../styles.css">
@@ -51,18 +51,18 @@
         <header class="doc-header">
             <h1>Deep Learning From Scratch II: Perceptrons</h1>
             <div class="doc-meta">
-                Living Document · Version 1.0 · last revised 26 Aug 2017
+                Tutorial · 26 Aug 2017
             </div>
         </header>
 
         <p>This is part 2 of a series of tutorials, in which we develop the mathematical and algorithmic underpinnings
-            of deep neural networks from scratch and implement our own neural network library in Python, mimicing the <a
-                    href="http://www.tensorflow.org">TensorFlow</a> API.&nbsp;Start with the first part: <a
+            of deep neural networks from scratch and implement our own neural network library in Python, mimicking the <a
+                    href="https://www.tensorflow.org">TensorFlow</a> API.&nbsp;Start with the first part: <a
                     href="/deep-learning-from-scratch-i-computational-graphs/">I: Computational Graphs</a>.</p>
         <ul>
             <li><a href="/deep-learning-from-scratch-i-computational-graphs/">Part I: Computational Graphs</a></li>
             <li><a href="/deep-learning-from-scratch-ii-perceptrons/">Part II: Perceptrons</a></li>
-            <li><a href="/deep-learning-from-scratch-iii-training-criterion/">Part III: Training criterion</a></li>
+            <li><a href="/deep-learning-from-scratch-iii-training-criterion/">Part III: Training Criterion</a></li>
             <li><a href="/deep-learning-from-scratch-iv-gradient-descent-and-backpropagation/">Part IV: Gradient Descent
                 and Backpropagation</a></li>
             <li><a href="/deep-learning-from-scratch-v-multi-layer-perceptrons/">Part V: Multi-Layer Perceptrons</a>
@@ -70,10 +70,10 @@
             <li><a href="/deep-learning-from-scratch-vi-tensorflow/">Part VI: TensorFlow</a></li>
         </ul>
 
-        <h1 id="Perceptrons">Perceptrons</h1>
+        <h2 id="Perceptrons">Perceptrons</h2>
         <h2 id="A-motivating-example">A motivating example</h2>
         <p>Perceptrons are a miniature form of neural network and a basic building block of more complex architectures.
-            Before going into the details, let's motivate them by an example. Assume that we are given a dataset
+            Before going into the details, let’s motivate them by an example. Assume that we are given a dataset
             consisting of 100 points in the plane. Half of the points are red and half of the points are blue.</p>
         <pre><code class="language-python"># Create red points centered at (-2, -2)
 red_points = np.random.randn(50, 2) - 2*np.ones((50, 2))
@@ -87,7 +87,7 @@ plt.scatter(blue_points[:,0], blue_points[:,1], color='blue')</code></pre>
 
         <p>As we can see, the red points are centered at $(-2, -2)$ and the blue points are centered at $(2, 2)$. Now,
             having seen this data, we can ask ourselves whether there is a way to determine if a point should be red or
-            blue. For example, if someone asks us what the color of the point $(3, 2)$ should be, we'd best respond with
+            blue. For example, if someone asks us what the color of the point $(3, 2)$ should be, we’d best respond with
             blue. Even though this point was not part of the data we have seen, we can infer this since it is located in
             the blue region of the space.</p>
         <p>But what is the general rule to determine if a point is more likely to be blue than red? Apparently, we can
@@ -103,7 +103,7 @@ plt.plot(x_axis, y_axis)</code></pre>
         <p>In the case above, we have $w = (1, 1)^T$ and $b = 0$. Now, in order to test whether the point is blue or
             red, we just have to check whether it is above or below the line. This can be achieved by checking the sign
             of $w^T x + b$. If it is positive, then $x$ is above the line. If it is negative, then $x$ is below the
-            line. Let's perform this test for our example point $(3, 2)^T$:</p>
+            line. Let’s perform this test for our example point $(3, 2)^T$:</p>
         <p>$$<br/>\begin{pmatrix}<br/>1 &amp; 1<br/>\end{pmatrix}<br/>\cdot \begin{pmatrix}<br/>3 \\<br/>2<br/>\end{pmatrix}
             = 5<br/>$$</p>
         <p>Since 5 &gt; 0, we know that the point is above the line and, therefore, should be classified as blue.</p>
@@ -127,7 +127,7 @@ plt.plot(x_axis, y_axis)</code></pre>
             <strong>sigmoid</strong> function $\sigma$:</p>
         <p>$$p(\hat{c}(x) = 1 \mid x) = \sigma(w^T x + b)$$</p>
         <p>where $$\sigma(a) = \frac{1}{1 + e^{-a}}$$</p>
-        <p>Let's take a look at what the sigmoid function looks like:</p>
+        <p>Let’s take a look at what the sigmoid function looks like:</p>
         <pre><code class="language-python"># Create an interval from -5 to 5 in steps of 0.01
 a = np.arange(-5, 5, 0.01)
 
@@ -142,7 +142,7 @@ plt.show()</code></pre>
         <p>As we can see, the sigmoid function assigns a probability of 0.5 to values where $w^T x + b = 0$ (i.e. points
             on the line) and asymptotes towards 1 the higher the value of $w^T x + b$ becomes, and towards 0 the lower
             it becomes, which is exactly what we want.</p>
-        <p>Let's now define the sigmoid function as an operation, since we'll need it later:</p>
+        <p>Let’s now define the sigmoid function as an operation, since we’ll need it later:</p>
         <pre><code class="language-python">class sigmoid(Operation):
     """Returns the sigmoid of x element-wise.
     """
@@ -176,7 +176,7 @@ w = Variable([1, 1])
 b = Variable(0)
 p = sigmoid( add(matmul(w, x), b) )</code></pre>
 
-        <p>Let's use this perceptron to compute the probability that $(3, 2)^T$ is a blue point:</p>
+        <p>Let’s use this perceptron to compute the probability that $(3, 2)^T$ is a blue point:</p>
         <pre><code class="language-python">session = Session()
 print(session.run(p, {
     x: [3, 2]
@@ -247,7 +247,7 @@ print(session.run(p, {
             computational graph looks as follows:</p>
         <p style="text-align: center;"><img class="aligncenter" src="perceptron3.png" style="max-width: 50%;" alt=""/></p>
         <h3 id="Example">Example</h3>
-        <p>Let's now generalize our red/blue perceptron to allow for batch computation and multiple output classes.</p>
+        <p>Let’s now generalize our red/blue perceptron to allow for batch computation and multiple output classes.</p>
         <pre><code class="language-python"># Create a new graph
 Graph().as_default()
 
@@ -275,7 +275,7 @@ print(output_probabilities[:10])</code></pre>
             column) and low probabilities for red (right column), as expected.</p>
 
         <p>If you have any questions, feel free to leave a comment. Otherwise, continue with the next part: <a
-                href="/deep-learning-from-scratch-iii-training-criterion/">III: Training criterion</a></p>
+                href="/deep-learning-from-scratch-iii-training-criterion/">III: Training Criterion</a></p>
     </article>
 
     <footer class="site-footer">

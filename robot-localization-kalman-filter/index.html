@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Robot Localization III: The Kalman Filter — Daniel Sabinasz</title>
     <meta name="description"
-          content="This is part 3 in a series of articles explaining methods for robot localization, i.e. determining and tracking a robot's location via noisy sensor measurements.">
+          content="This is part 3 in a series of articles explaining methods for robot localization, i.e. determining and tracking a robot’s location via noisy sensor measurements.">
     <link rel="stylesheet" href="../styles.css">
     <script>
         window.MathJax = {
@@ -26,12 +26,12 @@
         <header class="doc-header">
             <h1>Robot Localization III: The Kalman Filter</h1>
             <div class="doc-meta">
-                Living Document · Version 1.0 · last revised 22 Sep 2017
+                Tutorial · 22 Sep 2017
             </div>
         </header>
 
         <p>This is part 3 in a series of articles explaining methods for robot localization, i.e. determining and
-            tracking a robot's location via noisy sensor measurements. You should start with the first part: <a
+            tracking a robot’s location via noisy sensor measurements. You should start with the first part: <a
                     href="/robot-localization-recursive-bayesian-estimation/">Robot Localization I: Recursive Bayesian
                 Estimation</a></p>
         <p>This post deals with another solution to the continuous state space problem, the <strong>Kalman
@@ -69,7 +69,7 @@
             for deliberate sensor and measurement distributions, a representation of the belief could, as we argued in
             chapter 2, grow unboundedly over time.</p>
         <h2>One-dimensional Kalman Filter</h2>
-        <p>For simplicity, we'll first assume that we are dealing with a one-dimensional state space (i.e. $x_t$ is just
+        <p>For simplicity, we’ll first assume that we are dealing with a one-dimensional state space (i.e. $x_t$ is just
             a real number, e.g. a position along a line). We will take a look at the multidimensional case later. The
             transition phase from time $t$ to $t + 1$ just adds some number $\delta_{t+1}$ to the state, plus some
             unpredictable Gaussian noise $\epsilon_{t+1}$ (as before, imagine a robot moving at a desired speed of
@@ -161,7 +161,7 @@
         <p>We can see that even though the measurements have been very bad, we still arrive at a belief that is quite
             reasonable, with an error of only 0.144.</p>
         <h2>Multi-Dimensional Kalman Filter</h2>
-        <p>Let's now take a glimpse at the multi-dimensional situation, which looks a little scary but really is
+        <p>Let’s now take a glimpse at the multi-dimensional situation, which looks a little scary but really is
             completely analogous to the one-dimensional case.</p>
 
         <p>As before, the transition model has to be a linear Gaussian ($x_{t+1} = A_{t+1} x_t + \Delta_{t+1} +

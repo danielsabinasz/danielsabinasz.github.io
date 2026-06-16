@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Writing — Daniel Sabinasz</title>
     <meta name="description"
-          content="The written work of Daniel Sabinasz — essays, living documents, and peer-reviewed publications, as one continuous body of work.">
+          content="The written work of Daniel Sabinasz — essays, tutorials, and peer-reviewed publications, as one continuous body of work.">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -16,20 +16,29 @@
     <header class="doc-header">
         <h1>Writing</h1>
         <div class="doc-meta">
-            Papers, living documents, posters, and theses, whatever the form.
+            Papers, theses, posters, essays, and tutorials — whatever the form.
         </div>
     </header>
 
     <!-- =====================================================================
-         To publish anything — essay, living document, paper, poster, or thesis —
-         copy one <li class="entry"> block below and edit it. This is the only
-         file you ever touch. The tag (Article / Living Document / Paper / Poster /
-         Thesis) just describes the piece; entries are otherwise equal and listed
-         in roughly reverse-chronological order.
+         To publish anything, copy one <li class="entry"> block below and edit it.
+         This is the only file you ever touch. Entries are otherwise equal and
+         listed in roughly reverse-chronological order.
 
-         Each entry has the same reading order: title → tag·year → a one-sentence
+         Tags work on two independent axes:
+           • Form (always exactly one) — what the piece is:
+               Essay / Tutorial / Paper / Poster / Thesis
+           • Status (optional second tag) — Living, for a piece that is
+               continuously revised and re-released rather than fixed at
+               publication. Any form may be Living: even a Paper, if you keep
+               releasing new versions instead of submitting to a venue. When you
+               add the Living tag, also show the version and revision date in the
+               meta line (e.g. "· v1.2 · last revised 30 May 2026").
+
+         Each entry has the same reading order: title → tag(s)·date → a one-sentence
          plain-language summary (entry-desc) → the citation (entry-cite), which
-         sits quietly below. Living documents have only the summary and no citation.
+         sits quietly below. Self-published forms (Essay, Tutorial) carry a date but
+         no citation; venue forms (Paper, Poster, Thesis) carry a citation.
 
          Poster template — copy, set the title, year, PDF, summary, and citation:
 
@@ -48,12 +57,14 @@
          ===================================================================== -->
     <ul class="entries">
 
-        <!--<li class="entry">
+        <!-- Example: a Living piece. Form tag first, then the Living status tag,
+             then the version and revision date.
+        <li class="entry">
           <a class="entry-title" href="documents/example-living-document.html">
             A Working Theory of Representation in Neural Systems
           </a>
           <div class="entry-meta">
-            <span class="tag live">Living Document</span> · v1.2 · last revised 30 May 2026
+            <span class="tag essay">Essay</span> <span class="tag live">Living</span> · v1.2 · last revised 30 May 2026
           </div>
           <p class="entry-desc">
             An evolving, citable account of how representational content can be
@@ -180,7 +191,7 @@
             <p class="entry-cite">
                 Sabinasz, D., Richter, M., Lins, J., &amp; Schöner, G. (2022). In J. Culbertson,
                 Perfors, A., Rabagliati, H., &amp; Ramenzoni, V. (Eds.),
-                <em>Proceedings of the 43rd Annual Conference of the Cognitive Science
+                <em>Proceedings of the 44th Annual Conference of the Cognitive Science
                     Society</em>. Cognitive Science Society.
             </p>
         </li>
@@ -191,7 +202,7 @@
                 The Computational Theory of Mind
             </a>
             <div class="entry-meta">
-                <span class="tag live">Living Document</span> · v1.0 · last revised 2 Sep 2020
+                <span class="tag essay">Essay</span> · 2 Sep 2020
             </div>
             <p class="entry-desc">
                 A historical trend in the cognitive sciences has been to understand the brain as nature’s way of
@@ -222,7 +233,7 @@
                 Introduction to Evolutionary Psychology
             </a>
             <div class="entry-meta">
-                <span class="tag live">Living Document</span> · v1.0 · last revised 10 Oct 2019
+                <span class="tag essay">Essay</span> · 10 Oct 2019
             </div>
             <p class="entry-desc">
                 Evolutionary psychology is an approach to understand human behavior that combines insights gained from
@@ -255,7 +266,7 @@
                 This research presents a neural dynamic architecture that provides a biologically plausible alternative to symbolic computation for higher cognition. By grounding combinatorial concepts directly in perceptual systems, we demonstrate how complex linguistic and cognitive structures can emerge from neural dynamics without the need for traditional amodal symbol systems.
             </p>
             <p class="entry-cite">
-                Sabinasz, D., &amp; Richter, M. &amp; Lins, J. &amp; Schöner, G. (2019). In
+                Sabinasz, D., Richter, M. Lins, J. &amp; Schöner, G. (2019). In
                 <em>Proceedings of the 41st Annual Conference of the Cognitive Science Society</em>.
             </p>
         </li>
@@ -266,7 +277,7 @@
                 Building a Content-Based Multimedia Search Engine
             </a>
             <div class="entry-meta">
-                <span class="tag live">Living Document</span> · v1.0 · last revised between 24 Feb 2018 and 28 Oct 2018
+                <span class="tag tutorial">Tutorial</span> · Feb-Oct 2018
             </div>
             <p class="entry-desc">
                 A series of tutorials in which we learn how to build a content-based search engine that retrieves multimedia objects based on their content rather than based on keywords, title or meta description.
@@ -279,7 +290,7 @@
                 Dealing with Unbalanced Classes in Machine Learning
             </a>
             <div class="entry-meta">
-                <span class="tag live">Living Document</span> · v1.0 · last revised 16 Sep 2017
+                <span class="tag tutorial">Tutorial</span> · 16 Sep 2017
             </div>
             <p class="entry-desc">
                 Unbalanced training data leads to misleading accuracy metrics. Learn practical techniques to overcome
@@ -293,7 +304,7 @@
                 Robot Localization
             </a>
             <div class="entry-meta">
-                <span class="tag live">Living Document</span> · v1.0 · last revised between 9 Sep 2017 and 4 Oct 2017
+                <span class="tag tutorial">Tutorial</span> · Sep-Oct 2017
             </div>
             <p class="entry-desc">
                 A series of tutorials in which we explore methods for robot localization: the problem of tracking the
@@ -308,7 +319,7 @@
                 Why the Chinese Room Argument is Flawed
             </a>
             <div class="entry-meta">
-                <span class="tag live">Living Document</span> · v1.0 · last revised 3 Sep 2017
+                <span class="tag essay">Essay</span> · 3 Sep 2017
             </div>
             <p class="entry-desc">
                 This text deals with arguments against the possibility of so-called strong artificial intelligence, with
@@ -322,7 +333,7 @@
                 Gödel's Incompleteness Theorem and its Implications for Artificial Intelligence
             </a>
             <div class="entry-meta">
-                <span class="tag live">Living Document</span> · v1.0 · last revised 26 August 2017
+                <span class="tag essay">Essay</span> · 26 Aug 2017
             </div>
             <p class="entry-desc">
                 This text gives an overview of Gödel’s Incompleteness Theorem and its implications for artificial
@@ -337,7 +348,7 @@
                 Deep Learning From Scratch: Theory and Implementation
             </a>
             <div class="entry-meta">
-                <span class="tag live">Living Document</span> · v1.0 · last revised 25 Aug 2017
+                <span class="tag tutorial">Tutorial</span> · 25 Aug 2017
             </div>
             <p class="entry-desc">
                 A series of tutorials, in which we develop the mathematical and algorithmic underpinnings of deep neural networks from scratch and implement our own neural network library in Python.
@@ -427,5 +438,98 @@
     </footer>
 
 </main>
+
+<!-- =====================================================================
+     Tag filter — progressive enhancement.
+     The filter bar is built entirely in JavaScript and inserted into the
+     page. In any browser that cannot run this script (JS disabled, or too
+     old to support the APIs we feature-detect below), the bar simply never
+     appears and all entries remain visible — the page works exactly as it
+     did before. The filters are derived from the existing .tag pills on
+     each entry, so there is nothing extra to maintain when adding work.
+     ===================================================================== -->
+<script>
+    (function () {
+        // Only enhance where every API we use is available; otherwise bail
+        // out silently and leave the static, fully-visible list in place.
+        if (!document.querySelectorAll ||
+            typeof Array.from !== 'function' ||
+            !('classList' in document.documentElement) ||
+            !('hidden' in document.createElement('div'))) {
+            return;
+        }
+
+        var list = document.querySelector('.entries');
+        if (!list) return;
+        var entries = Array.from(list.querySelectorAll('.entry'));
+        if (!entries.length) return;
+
+        // Human-readable labels for the form / status classes on .tag pills.
+        var LABELS = {
+            paper: 'Papers', thesis: 'Theses', poster: 'Posters',
+            essay: 'Essays', tutorial: 'Tutorials', live: 'Living'
+        };
+        // Preferred button order; present tags not listed here are appended.
+        var ORDER = ['paper', 'thesis', 'poster', 'essay', 'tutorial', 'live'];
+
+        // Record each entry's tag keys, read straight from its .tag pills.
+        var present = {};
+        entries.forEach(function (entry) {
+            var keys = [];
+            Array.from(entry.querySelectorAll('.tag')).forEach(function (tag) {
+                Array.from(tag.classList).forEach(function (cls) {
+                    if (LABELS[cls]) { keys.push(cls); present[cls] = true; }
+                });
+            });
+            entry.setAttribute('data-tags', keys.join(' '));
+        });
+
+        var available = ORDER.filter(function (k) { return present[k]; });
+        Object.keys(present).forEach(function (k) {
+            if (available.indexOf(k) === -1) available.push(k);
+        });
+        if (available.length < 2) return; // nothing meaningful to filter by
+
+        var current = 'all';
+        var buttons = [];
+
+        function apply(key) {
+            current = key;
+            entries.forEach(function (entry) {
+                var tags = ' ' + (entry.getAttribute('data-tags') || '') + ' ';
+                var show = key === 'all' || tags.indexOf(' ' + key + ' ') !== -1;
+                if (show) entry.removeAttribute('hidden');
+                else entry.setAttribute('hidden', '');
+            });
+            buttons.forEach(function (b) {
+                b.setAttribute('aria-pressed', b.getAttribute('data-key') === key ? 'true' : 'false');
+            });
+        }
+
+        function makeButton(key, label) {
+            var btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'filter-btn' + (key === 'all' ? '' : ' filter-' + key);
+            btn.textContent = label;
+            btn.setAttribute('data-key', key);
+            btn.setAttribute('aria-pressed', 'false');
+            btn.addEventListener('click', function () { apply(key); });
+            buttons.push(btn);
+            return btn;
+        }
+
+        var bar = document.createElement('div');
+        bar.className = 'filter-bar';
+        bar.setAttribute('role', 'group');
+        bar.setAttribute('aria-label', 'Filter writing by type');
+        bar.appendChild(makeButton('all', 'All'));
+        available.forEach(function (key) {
+            bar.appendChild(makeButton(key, LABELS[key] || key));
+        });
+
+        list.parentNode.insertBefore(bar, list);
+        apply('all');
+    })();
+</script>
 </body>
 </html>

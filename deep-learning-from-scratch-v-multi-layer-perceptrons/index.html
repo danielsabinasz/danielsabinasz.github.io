@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Deep Learning From Scratch V: Multi-Layer Perceptrons</title>
+    <title>Deep Learning From Scratch V: Multi-Layer Perceptrons — Daniel Sabinasz</title>
     <meta name="description"
           content="This is part 5 of a series of tutorials, in which we develop the mathematical and algorithmic underpinnings of deep neural networks from scratch and implement our own neural network library in Python.">
     <link rel="stylesheet" href="../styles.css">
@@ -53,18 +53,18 @@
         <header class="doc-header">
             <h1>Deep Learning From Scratch V: Multi-Layer Perceptrons</h1>
             <div class="doc-meta">
-                Living Document · Version 1.0 · last revised 26 Aug 2017
+                Tutorial · 26 Aug 2017
             </div>
         </header>
 
         <p>This is part 5 of a series of tutorials, in which we develop the mathematical and algorithmic underpinnings
-            of deep neural networks from scratch and implement our own neural network library in Python, mimicing the <a
-                    href="http://www.tensorflow.org">TensorFlow</a> API.&nbsp;Start with the first part: <a
+            of deep neural networks from scratch and implement our own neural network library in Python, mimicking the <a
+                    href="https://www.tensorflow.org">TensorFlow</a> API.&nbsp;Start with the first part: <a
                     href="/deep-learning-from-scratch-i-computational-graphs/">I: Computational Graphs</a>.</p>
         <ul>
             <li><a href="/deep-learning-from-scratch-i-computational-graphs/">Part I: Computational Graphs</a></li>
             <li><a href="/deep-learning-from-scratch-ii-perceptrons/">Part II: Perceptrons</a></li>
-            <li><a href="/deep-learning-from-scratch-iii-training-criterion/">Part III: Training criterion</a></li>
+            <li><a href="/deep-learning-from-scratch-iii-training-criterion/">Part III: Training Criterion</a></li>
             <li><a href="/deep-learning-from-scratch-iv-gradient-descent-and-backpropagation/">Part IV: Gradient Descent
                 and Backpropagation</a></li>
             <li><a href="/deep-learning-from-scratch-v-multi-layer-perceptrons/">Part V: Multi-Layer Perceptrons</a>
@@ -72,11 +72,11 @@
             <li><a href="/deep-learning-from-scratch-vi-tensorflow/">Part VI: TensorFlow</a></li>
         </ul>
 
-        <h1 id="Multi-layer-perceptrons">Multi-layer perceptrons</h1>
+        <h2 id="Multi-layer-perceptrons">Multi-layer perceptrons</h2>
         <h2 id="Motivation">Motivation</h2>
         <p>Many real-world classes that we encounter in machine learning are not linearly separable. This means that
             there does not exist any line with all the points of the first class on one side of the line and all the
-            points of the other class on the other side. Let's illustrate this with an example.</p>
+            points of the other class on the other side. Let’s illustrate this with an example.</p>
         <pre><code class="language-python"># Create two clusters of red points centered at (0, 0) and (1, 1), respectively.
 red_points = np.concatenate((
     0.2*np.random.randn(25, 2) + np.array([[0, 0]]*25),
@@ -97,7 +97,7 @@ plt.scatter(blue_points[:,0], blue_points[:,1], color='blue')</code></pre>
             play: They allow us to train a decision boundary of a more complex shape than a straight line.</p>
         <h2 id="Computational-graph">Computational graph</h2>
         <p>As their name suggests, multi-layer perceptrons (MLPs) are composed of multiple perceptrons stacked one after
-            the other in a layer-wise fashion. Let's look at a visualization of the computational graph:</p>
+            the other in a layer-wise fashion. Let’s look at a visualization of the computational graph:</p>
         <p><img class="aligncenter" src="mlp.png" alt="" style="max-width: 100%;"/></p>
         <p>As we can see, the input is fed into the first layer, which is a multidimensional perceptron with a weight
             matrix $W_1$ and bias vector $b_1$. The output of that layer is then fed into second layer, which is again a
@@ -190,11 +190,11 @@ plt.plot(xs_p, ys_p, 'ro', xs_n, ys_n, 'bo')</code></pre>
         <p>As we can see, we have learned a rather complex decision boundary. If we use more layers, the decision
             boundary can become arbitrarily complex, allowing us to learn classification patterns that are impossible to
             spot by a human being, especially in higher dimensions.</p>
-        <h1 id="Recap">Recap</h1>
+        <h2 id="Recap">Recap</h2>
         <p>Congratulations on making it this far! You have learned the foundations of building neural networks from
             scratch, and in contrast to most machine learning practitioners, you now know how it all works under the
             hood and why it is done the way it is done.</p>
-        <p>Let's recap what we have learned. We started out by considering <strong>computational graphs</strong> in
+        <p>Let’s recap what we have learned. We started out by considering <strong>computational graphs</strong> in
             general, and we saw how to build them and how to compute their output. We then moved on to describe <strong>perceptrons</strong>,
             which are linear classifiers that assign a probability to each output class by squashing the output of
             $w^Tx+b$ through a <strong>sigmoid</strong> (or <strong>softmax</strong>, in the case of multiple classes).
@@ -203,11 +203,11 @@ plt.plot(xs_p, ys_p, 'ro', xs_n, ys_n, 'bo')</code></pre>
             next step, we saw how to minimize the loss via <strong>gradient descent</strong>: By iteratively stepping
             into the direction of the negative gradient. We then introduced <strong>backpropagation</strong> as a means
             of computing the derivative of the loss with respect to each node by performing a breadth-first search and
-            multiplying according to the chain rule. We used all that we've learned to train a good linear classifier
+            multiplying according to the chain rule. We used all that we’ve learned to train a good linear classifier
             for the red/blue example dataset. Finally, we learned about <strong>multi-layer perceptrons</strong> as a
             means of learning non-linear decision boundaries, implemented an MLP with one hidden layer and successfully
             trained it on a non-linearly-separable dataset.</p>
-        <h1 id="Next-steps">Next steps</h1>
+        <h2 id="Next-steps">Next steps</h2>
         <p>The upcoming sections will be focused on providing hands-on experience in neural network training. Continue
             with the next part: <a href="/deep-learning-from-scratch-vi-tensorflow/">VI: TensorFlow</a></p>
 
