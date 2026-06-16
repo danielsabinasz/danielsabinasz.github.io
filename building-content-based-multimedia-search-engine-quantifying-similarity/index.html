@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Building a Content-Based Multimedia Search Engine I: Quantifying Similarity</title>
+    <meta name="description"
+          content="This is part 1 in a series of tutorials in which we learn how to build a content-based search engine that retrieves multimedia objects based on their content rather than based on keywords, title or meta description.">
+    <link rel="stylesheet" href="../styles.css">
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+<main class="page wide">
+
+    <a class="backlink" href="../index.html">Daniel Sabinasz</a>
+
+    <article>
+        <header class="doc-header">
+            <h1>Building a Content-Based Multimedia Search Engine I: Quantifying Similarity</h1>
+            <div class="doc-meta">
+                Living Document · Version 1.0 · last revised 24 Feb 2018
+            </div>
+        </header>
+
+        <div style="text-align: center;">
+            <img src="img.png" style="max-width: 100%;">
+        </div>
+
+        <p>This is part 1 in a series of tutorials in which we learn how to build a content-based search engine that
+            retrieves multimedia objects based on their content rather than based on keywords, title or meta
+            description.</p>
+        <ul>
+            <li><a href="/building-content-based-multimedia-search-engine-quantifying-similarity/">Part I: Quantifying
+                Similarity</a></li>
+            <li><a href="/building-content-based-multimedia-search-engine-feature-extraction/">Part II: Extracting
+                Feature Vectors</a></li>
+            <li><a href="/building-content-based-multimedia-search-engine-feature-signatures/">Part III: Feature
+                Signatures</a></li>
+            <li><a href="/building-content-based-multimedia-search-engine-earth-movers-distance/">Part IV: Earth Mover's
+                Distance</a></li>
+            <li><a href="/building-content-based-multimedia-search-engine-signature-quadratic-form-distance/">Part V:
+                Signature Quadratic Form Distance</a></li>
+            <li><a href="/building-content-based-multimedia-search-engine-efficient-query-processing">Part VI: Efficient
+                Query Processing</a></li>
+        </ul>
+        <p>The explosion of user-generated content on the internet during the last decades has left the world of
+            querying multimedia data with unprecedented challenges. There is a demand for this data to be processed and
+            indexed in order to make it available for different types of queries, whilst ensuring acceptable response
+            times.</p>
+        <p>An arguably important task is the retrieval of multimedia objects (e.g. images or videos) that are <strong>visually
+            similar</strong> to a certain query object (e.g. a query image or a query video). We define two multimedia
+            objects to be visually similar if they depict contents that "look similar" to humans. So far, this task has
+            gained comparatively little research recognition.</p>
+        <p>Most of the major search engines or content suggestion engines only allow for text-based queries and the
+            search only considers metadata such as title, description text or user-specified tags. The content of the
+            multimedia objects is not taken into account.&nbsp;Such systems are very limited with respect to the types
+            of queries that are possible, and with respect to the actual relevance of the retrieved results.</p>
+        <p>In this series of tutorials, I introduce a method for retrieving visually similar multimedia objects to a
+            specified query object. This method is based on so-called <strong>feature signatures</strong>, which
+            comprise an expressive summary of the content of a multimedia object that is significantly more compact than
+            the object itself, allowing for an efficient&nbsp;comparison between objects. This method is applicable to
+            virtually all kinds of multimedia objects. In the course of this tutorial, we'll take content-based video
+            similarity search as our main example. However, it should be clear how to adapt this method to your
+            particular needs.</p>
+        <h2>Quantifying Similarity</h2>
+        <p>This section introduces some fundamental preliminaries for the problem of retrieving similar multimedia
+            objects to a given query object. We will review how similarity between multimedia objects can be formalized
+            and which types of queries exist with respect to this formalization.</p>
+        <p>In order to retrieve similar multimedia objects to a given query object, we need a way to compare the query
+            object to the database objects and quantify the similarity or dissimilarity numerically. There are many ways
+            in which similarity or dissimilarity between two objects can be measured, and it is highly dependent on the
+            nature of the compared objects and on the aspects which we want to compare. For example, videos could be
+            compared with respect to their visual content, their auditory content or meta-data such as the title or a
+            description text.</p>
+        <p>The most common way to model similarity is by means of a <strong>distance function</strong>. A distance
+            function assigns high values to objects that are dissimilar and small values to objects that are similar,
+            reaching 0 when the two compared objects are the same. Mathematically, a distance function is defined as
+            follows:</p>
+        <p>Let $X$ be a set. A function $\delta : X \times X \rightarrow R$ is called a distance function if it holds
+            for all $x, y \in X$:</p>
+        <ul>
+            <li>$\delta(x, x) = 0$ (reflexivity)</li>
+            <li>$\delta(x, y) = \delta(y, x)$ (symmetry)</li>
+            <li>$\delta(x, y) \geq 0$ (non-negativity)</li>
+        </ul>
+        <p>When it comes to efficient query processing, as we will see later, it is useful if the utilized distance
+            function is a <strong>metric</strong>.</p>
+        <p>Let $\delta : X \times X \rightarrow R$ be a distance function. $\delta$ is called a metric if it holds for
+            all $x, y, z \in X$:</p>
+        <ul>
+            <li>$\delta(x, y) = 0 \Leftrightarrow x = y$ (identity of indiscernibles)</li>
+            <li>$\delta(x, y) \leq \delta(x, z) + \delta(z, y)$ (triangle inequality)</li>
+        </ul>
+
+        <p>An alternative way to model similarity between two objects is by means of a <strong>similarity
+            function</strong>, which assigns small values to objects that are dissimilar and larger values to objects
+            that are more similar, reaching its maximum when the two compared objects are the same (cf. [BS13]).</p>
+
+        <p>Let X be a set. A function $s : X \times X \rightarrow \mathbb{R}$ is called a similarity function if it is
+            symmetric and if it holds for all $x, y \in X$ that $s(x, x) \geq s(x, y)$ (maximum self-similarity).</p>
+
+        <h2>Query Types</h2>
+        <p>Once we have modeled the similarity for pairs of multimedia objects by means of a distance function, we can
+            reformulate the problem of retrieving similar objects to the query object by utilizing such a function. A
+            prominent query type is the so-called <strong>range query</strong>, which retrieves all database objects for
+            which the distance to the query object lies below a certain threshold. The formal definition is given below
+            (adopted from [BS13]).</p>
+        <p>Let $X$ be a set of objects, $\delta : X \times X \rightarrow R$ be a distance function, $DB \subseteq X$ be
+            a database of objects, $q \in X$ be a query object and $\epsilon \in \mathbb{R}$ be a search radius. The
+            range query $range(q, \delta, X)$ is defined as</p>
+        <p>$range_\epsilon(q, \delta, X) = \{x \in X \; | \; \delta(q, x) \leq \epsilon\}$</p>
+        <p>For range queries, it is hard to determine a suitable threshold $\epsilon$ to yield a result set of a desired
+            size. When $\epsilon$ is too low, the result set might be very small or even empty. On the other hand, when
+            choosing it too large, the result set might come near to including the entire database. This problem can be
+            solved by issuing a <strong>k-Nearest Neighbor Query</strong> (short: kNN query) instead. In this query
+            type, we specify the desired number of retrieved objects $k$ instead of a distance threshold. If we assume
+            that the distances between the query object and the database objects are pairwise distinct, the k-Nearest
+            Neighbors are the $k$ objects that have the smallest distance to the query object. The formal definition is
+            given below (adopted from [SK98]).</p>
+        <p>Let $X$ be a set of objects, $\delta : X \times X \rightarrow R$ be a distance function, $DB \subseteq X$ be
+            a database of objects, $q \in X$ be a query object and $k \in \mathbb{N}, k \leq |DB|$. We define the
+            k-Nearest Neighbors of $q$ w.r.t. $\delta$ as the smallest set $NN_q(k) \subseteq DB$ with $|NN_q(k)| \geq
+            k$ such that the following holds:</p>
+        <p>$\forall o \in NN_q(k), \forall o^\prime \in DB &minus; NN_q(k) : \delta(o, q) &lt; \delta(o^\prime , q)$</p>
+        <p>Our goal now is to devise a distance function that reflects human judgement of similarity. In the next
+            section, we will learn how to extract features from multimedia objects, which are sets of vectors that
+            characterize the content of that object. Continue with the next section: <a
+                    href="/building-content-based-search-engine-feature-extraction/">Extracting Feature Vectors</a>.</p>
+        <h2>References</h2>
+        <p>[BS13]&nbsp;Christian Beecks and Thomas Seidl. <em>Distance based similarity models for content based
+            multimedia retrieval.</em> PhD thesis, Aachen, 2013. Zsfassung in dt. und engl. Sprache; Aachen, Techn.
+            Hochsch., Diss., 2013.<br/>[SK98] Thomas Seidl and Hans-Peter Kriegel. <em>Optimal multi-step k-nearest
+                neighbor search</em>. In ACM SIGMOD Record, volume 27, pages 154&ndash;165. ACM, 1998.</p>
+    </article>
+
+    <footer class="site-footer">
+        © Daniel Sabinasz · <a href="../index.html">Home</a>
+    </footer>
+
+</main>
+</body>
+</html>

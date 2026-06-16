@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Deep Learning From Scratch VI: TensorFlow</title>
+    <meta name="description"
+          content="This is part 6 of a series of tutorials, in which we develop the mathematical and algorithmic underpinnings of deep neural networks from scratch and implement our own neural network library in Python.">
+    <link rel="stylesheet" href="../styles.css">
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-light.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            document.querySelectorAll('pre').forEach((pre) => {
+                // Create the button
+                const button = document.createElement('button');
+                button.innerText = 'Copy';
+                button.className = 'copy-btn';
+
+                // Add click event
+                button.addEventListener('click', () => {
+                    const code = pre.querySelector('code').innerText;
+                    navigator.clipboard.writeText(code).then(() => {
+                        button.innerText = 'Copied!';
+                        setTimeout(() => {
+                            button.innerText = 'Copy';
+                        }, 2000);
+                    });
+                });
+
+                // Append to the <pre> block
+                pre.appendChild(button);
+            });
+        });
+    </script>
+</head>
+<body>
+<main class="page wide">
+
+    <a class="backlink" href="../index.html">Daniel Sabinasz</a>
+
+    <article>
+        <header class="doc-header">
+            <h1>Deep Learning From Scratch VI: TensorFlow</h1>
+            <div class="doc-meta">
+                Living Document · Version 1.0 · last revised 16 Jun 2026
+            </div>
+        </header>
+
+        <p>This is part 6 of a series of tutorials, in which we develop the mathematical and algorithmic underpinnings of deep neural networks from scratch and implement our own neural network library in Python, mimicing the <a href="http://www.tensorflow.org">TensorFlow</a> API.&nbsp;Start with the first part: <a href="/deep-learning-from-scratch-i-computational-graphs/">I: Computational Graphs</a>.</p>
+        <ul>
+            <li><a href="/deep-learning-from-scratch-i-computational-graphs/">Part I: Computational Graphs</a></li>
+            <li><a href="/deep-learning-from-scratch-ii-perceptrons/">Part II: Perceptrons</a></li>
+            <li><a href="/deep-learning-from-scratch-iii-training-criterion/">Part III: Training criterion</a></li>
+            <li><a href="/deep-learning-from-scratch-iv-gradient-descent-and-backpropagation/">Part IV: Gradient Descent and Backpropagation</a></li>
+            <li><a href="/deep-learning-from-scratch-v-multi-layer-perceptrons/">Part V: Multi-Layer Perceptrons</a></li>
+            <li><a href="/deep-learning-from-scratch-vi-tensorflow/">Part VI: TensorFlow</a></li>
+        </ul>
+        <h1>TensorFlow</h1>
+        <p class="tio-markdown_p">It is now time to say goodbye to our own toy library and start to get professional by switching to the actual TensorFlow.</p>
+        <p class="tio-markdown_p">As we've learned already, TensorFlow conceptually works exactly the same as our implementation. So why not just stick to our own implementation? There are a couple of reasons:</p>
+        <ol class="tio-markdown_ol">
+            <li class="tio-markdown_li">
+                <p class="tio-markdown_p">TensorFlow is the product of years of effort in providing efficient implementations for all the algorithms relevant to our purposes. Fortunately, there are experts at Google whose everyday job is to optimize these implementations. We do not need to know all of these details. We only have to know what the algorithms do conceptually (which we do now) and how to call them.</p>
+            </li>
+            <li class="tio-markdown_li">
+                <p class="tio-markdown_p">TensorFlow allows us to train our neural networks on the GPU (graphical processing unit), resulting in an enormous speedup through massive parallelization.</p>
+            </li>
+            <li class="tio-markdown_li">
+                <p class="tio-markdown_p">Google is now building&nbsp;<a class="tio-markdown_a" href="https://en.wikipedia.org/wiki/Tensor_processing_unit">Tensor processing units</a>, which are integrated circuits specifically built to run and train TensorFlow graphs, resulting in yet more enormous speedup.</p>
+            </li>
+            <li class="tio-markdown_li">
+                <p class="tio-markdown_p">TensorFlow comes pre-equipped with a lot of neural network architectures that would be cumbersome to build on our own.</p>
+            </li>
+            <li class="tio-markdown_li">
+                <p class="tio-markdown_p">TensorFlow comes with a high-level API called Keras that allows us to build neural network architectures way easier than by defining the computational graph by hand, as we did up until now.</p>
+            </li>
+        </ol>
+
+        <p>
+            <strong>Update 2019</strong>: The new TensorFlow 2 has an updated API. If you would like to migrate the example to TensorFlow 2, you can find information on how to do that here: <a href="https://www.tensorflow.org/guide/migrate" target="new" rel="noopener noreferrer">https://www.tensorflow.org/guide/migrate</a>. The text below assumes the outdated TensorFlow 1 API which is highly analogous to the API we built. Perhaps trying to migrate this example code to TensorFlow 2 is precisely the exercise that will get you started with TensorFlow 2.
+        </p>
+
+        <p class="tio-markdown_p">So let's get started. Installing TensorFlow is very easy.</p>
+        <pre class="tio-markdown_pre"><code class="tio-markdown_code">pip install tensorflow
+</code></pre>
+        <p class="tio-markdown_p">If we want GPU acceleration, we have to install the package&nbsp;<code class="tio-markdown_code">tensorflow-gpu</code>:</p>
+        <pre class="tio-markdown_pre"><code class="tio-markdown_code">pip install tensorflow-gpu
+</code></pre>
+        <p class="tio-markdown_p">In our code, we import it as follows:</p>
+        <pre class="tio-markdown_pre"><code class="tio-markdown_code">import tensorflow as tf
+</code></pre>
+        <p class="tio-markdown_p">Since the syntax we are used to from the previous sections mimics the TensorFlow syntax, we already know how to use TensorFlow. We only have to make the following changes:</p>
+        <ul class="tio-markdown_ul">
+            <li class="tio-markdown_li">Add&nbsp;<code class="tio-markdown_code">tf.</code>&nbsp;to the front of all our function calls and classes</li>
+            <li class="tio-markdown_li">Call&nbsp;<code class="tio-markdown_code">session.run(tf.global_variables_initializer())</code>&nbsp;after building the graph</li>
+        </ul>
+
+        <p class="tio-markdown_p">The rest is exactly the same. Let's recreate the multi-layer perceptron from the previous section using TensorFlow:</p>
+
+        <pre><code class="language-python">import tensorflow as tf
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Create two clusters of red points centered at (0, 0) and (1, 1), respectively.
+red_points = np.concatenate((
+    0.2*np.random.randn(25, 2) + np.array([[0, 0]]*25),
+    0.2*np.random.randn(25, 2) + np.array([[1, 1]]*25)
+))
+
+# Create two clusters of blue points centered at (0, 1) and (1, 0), respectively.
+blue_points = np.concatenate((
+    0.2*np.random.randn(25, 2) + np.array([[0, 1]]*25),
+    0.2*np.random.randn(25, 2) + np.array([[1, 0]]*25)
+))
+
+# Create training input placeholder
+X = tf.placeholder(dtype=tf.float64)
+
+# Create placeholder for the training classes
+c = tf.placeholder(dtype=tf.float64)
+
+# Build a hidden layer
+W_hidden = tf.Variable(np.random.randn(2, 2))
+b_hidden = tf.Variable(np.random.randn(2))
+p_hidden = tf.sigmoid( tf.add(tf.matmul(X, W_hidden), b_hidden) )
+
+# Build the output layer
+W_output = tf.Variable(np.random.randn(2, 2))
+b_output = tf.Variable(np.random.randn(2))
+p_output = tf.nn.softmax( tf.add(tf.matmul(p_hidden, W_output), b_output) )
+
+# Build cross-entropy loss
+J = tf.negative(tf.reduce_sum(tf.reduce_sum(tf.multiply(c, tf.log(p_output)), axis=1)))
+
+# Build minimization op
+minimization_op = tf.train.GradientDescentOptimizer(learning_rate = 0.01).minimize(J)
+
+# Build placeholder inputs
+feed_dict = {
+    X: np.concatenate((blue_points, red_points)),
+    c:
+        [[1, 0]] * len(blue_points)
+        + [[0, 1]] * len(red_points)
+
+}
+
+# Create session
+session = tf.Session()
+
+# Initialize variables
+session.run(tf.global_variables_initializer())
+
+# Perform 1000 gradient descent steps
+for step in range(1000):
+    J_value = session.run(J, feed_dict)
+    if step % 100 == 0:
+        print("Step:", step, " Loss:", J_value)
+    session.run(minimization_op, feed_dict)
+
+# Print final result
+W_hidden_value = session.run(W_hidden)
+print("Hidden layer weight matrix:\n", W_hidden_value)
+b_hidden_value = session.run(b_hidden)
+print("Hidden layer bias:\n", b_hidden_value)
+W_output_value = session.run(W_output)
+print("Output layer weight matrix:\n", W_output_value)
+b_output_value = session.run(b_output)
+print("Output layer bias:\n", b_output_value)
+
+# Visualize classification boundary
+xs = np.linspace(-2, 2)
+ys = np.linspace(-2, 2)
+pred_classes = []
+for x in xs:
+    for y in ys:
+        pred_class = session.run(p_output,
+                              feed_dict={X: [[x, y]]})[0]
+        pred_classes.append((x, y, pred_class.argmax()))
+xs_p, ys_p = [], []
+xs_n, ys_n = [], []
+for x, y, c in pred_classes:
+    if c == 0:
+        xs_n.append(x)
+        ys_n.append(y)
+    else:
+        xs_p.append(x)
+        ys_p.append(y)
+plt.plot(xs_p, ys_p, 'ro', xs_n, ys_n, 'bo')</code></pre>
+
+
+    </article>
+
+    <footer class="site-footer">
+        © Daniel Sabinasz · <a href="../index.html">Home</a>
+    </footer>
+
+</main>
+<script>hljs.highlightAll();</script>
+</body>
+</html>

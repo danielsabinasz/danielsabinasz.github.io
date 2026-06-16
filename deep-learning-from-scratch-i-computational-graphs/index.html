@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Deep Learning From Scratch I: Computational Graphs</title>
+    <meta name="description"
+          content="This is part 1 of a series of tutorials, in which we develop the mathematical and algorithmic underpinnings of deep neural networks from scratch and implement our own neural network library in Python.">
+    <link rel="stylesheet" href="../styles.css">
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-light.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <style>
+        /* Force background to be transparent */
+        code {
+            background: transparent !important;
+            border: none;
+        }
+    </style>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            document.querySelectorAll('pre').forEach((pre) => {
+                // Create the button
+                const button = document.createElement('button');
+                button.innerText = 'Copy';
+                button.className = 'copy-btn';
+
+                // Add click event
+                button.addEventListener('click', () => {
+                    const code = pre.querySelector('code').innerText;
+                    navigator.clipboard.writeText(code).then(() => {
+                        button.innerText = 'Copied!';
+                        setTimeout(() => { button.innerText = 'Copy'; }, 2000);
+                    });
+                });
+
+                // Append to the <pre> block
+                pre.appendChild(button);
+            });
+        });
+    </script>
+</head>
+<body>
+<main class="page wide">
+
+    <a class="backlink" href="../index.html">Daniel Sabinasz</a>
+
+    <article>
+        <header class="doc-header">
+            <h1>Deep Learning From Scratch I: Computational Graphs</h1>
+            <div class="doc-meta">
+                Living Document · Version 1.0 · last revised 26 Aug 2017
+            </div>
+        </header>
+
+        <p>This is part 1 of a series of tutorials, in which we develop the mathematical and algorithmic underpinnings
+            of deep neural networks from scratch and implement our own neural network library in Python, mimicing the <a
+                    href="http://www.tensorflow.org">TensorFlow</a> API.</p>
+        <ul>
+            <li><a href="/deep-learning-from-scratch-i-computational-graphs/">Part I: Computational Graphs</a></li>
+            <li><a href="/deep-learning-from-scratch-ii-perceptrons/">Part II: Perceptrons</a></li>
+            <li><a href="/deep-learning-from-scratch-iii-training-criterion/">Part III: Training criterion</a></li>
+            <li><a href="/deep-learning-from-scratch-iv-gradient-descent-and-backpropagation/">Part IV: Gradient Descent
+                and Backpropagation</a></li>
+            <li><a href="/deep-learning-from-scratch-v-multi-layer-perceptrons/">Part V: Multi-Layer Perceptrons</a>
+            </li>
+            <li><a href="/deep-learning-from-scratch-vi-tensorflow/">Part VI: TensorFlow</a></li>
+        </ul>
+        <p>I do not assume that you have any preknowledge about machine learning or neural networks. However, you should
+            have some preknowledge of calculus, linear algebra, fundamental algorithms and probability theory on an
+            undergraduate level. If you get stuck at some point, please leave a comment.</p>
+        <p>By the end of this text, you will have a deep understanding of the math behind neural networks and how deep
+            learning libraries work under the hood.</p>
+        <p>I have tried to keep the code as simple and concise as possible, favoring conceptual clarity over efficiency.
+            Since our API mimics the TensorFlow API, you will know how to use TensorFlow once you have finished this
+            text, and you will know how TensorFlow works under the hood conceptually (without all the overhead that
+            comes with an omnipotent, maximally efficient machine learning API).</p>
+        <p>The full source code of the API can be found at <a href="https://github.com/danielsabinasz/TensorSlow">https://github.com/danielsabinasz/TensorSlow</a>.
+            You also find a Jupyter Notebook there, which is equivalent to this blog post but allows you to fiddle with
+            the code.</p>
+        <h1 id="Computational-graphs">Computational graphs</h1>
+        <p>We shall start by defining the concept of a computational graph, since neural networks are a special form
+            thereof. A computational graph is a directed graph where the nodes correspond to <strong>operations</strong>
+            or <strong>variables</strong>. Variables can feed their value into operations, and operations can feed their
+            output into other operations. This way, every node in the graph defines a function of the variables.</p>
+        <p>The values that are fed into the nodes and come out of the nodes are called <strong>tensors</strong>, which
+            is just a fancy word for a multi-dimensional array. Hence, it subsumes scalars, vectors and matrices as well
+            as tensors of a higher rank.</p>
+        <p>Let's look at an example. The following computational graph computes the sum $z$ of two inputs $x$ and
+            $y$.<br/>Here, $x$ and $y$ are input nodes to $z$ and $z$ is a consumer of $x$ and $y$. $z$ therefore
+            defines a function $z : \mathbb{R^2} \rightarrow \mathbb{R}$ where $z(x, y) = x + y$.</p>
+        <p style="text-align: center;"><img class="aligncenter" src="affine_transformation.png" style="max-width: 30%;"
+                                            alt=""/></p>
+        <p>The concept of a computational graph becomes more useful once the computations become more complex. For
+            example, the following computational graph defines an affine transformation $z(A, x, b) = Ax + b$.</p>
+        <p style="text-align: center;"><img class="aligncenter" src="affine_transformation.png" style="max-width: 30%;"
+                                            alt=""/></p>
+        <h2 id="Operations">Operations</h2>
+        <p>Every operation is characterized by three things:</p>
+        <ul>
+            <li>A <code>compute</code> function that computes the operation's output given values for the operation's
+                inputs
+            </li>
+            <li>A list of <code>input_nodes</code> which can be variables or other operations</li>
+            <li>A list of <code>consumers</code> that use the operation's output as their input</li>
+        </ul>
+        <p>Let's put this into code:</p>
+        <pre><code class="language-python">class Operation:
+    """Represents a graph node that performs a computation.
+
+    An `Operation` is a node in a `Graph` that takes zero or
+    more objects as input, and produces zero or more objects
+    as output.
+    """
+
+    def __init__(self, input_nodes=[]):
+        """Construct Operation
+        """
+        self.input_nodes = input_nodes
+
+        # Initialize list of consumers (i.e. nodes that receive this operation's output as input)
+        self.consumers = []
+
+        # Append this operation to the list of consumers of all input nodes
+        for input_node in input_nodes:
+            input_node.consumers.append(self)
+
+        # Append this operation to the list of operations in the currently active default graph
+        _default_graph.operations.append(self)
+
+    def compute(self):
+        """Computes the output of this operation.
+        "" Must be implemented by the particular operation.
+        """
+        pass</code></pre>
+
+        <h3 id="Some-elementary-operations">Some elementary operations</h3>
+        <p>Let's implement some elementary operations in order to become familiar with the <code>Operation</code> class
+            (and because we will need them later).&nbsp;In both of these operations, we assume that the tensors are&nbsp;<a
+                    class="tio-markdown_a" href="http://www.numpy.org/">NumPy</a>&nbsp;arrays, in which the element-wise
+            addition and matrix multiplication (<code class="tio-markdown_code">.dot</code>) are already implemented for
+            us.</p>
+        <h4 id="Addition">Addition</h4>
+        <pre><code class="language-python">class add(Operation):
+    """Returns x + y element-wise.
+    """
+
+    def __init__(self, x, y):
+        """Construct add
+
+        Args:
+          x: First summand node
+          y: Second summand node
+        """
+        super().__init__([x, y])
+
+    def compute(self, x_value, y_value):
+        """Compute the output of the add operation
+
+        Args:
+          x_value: First summand value
+          y_value: Second summand value
+        """
+        return x_value + y_value</code></pre>
+
+        <h4 id="Matrix-multiplication">Matrix multiplication</h4>
+        <pre><code class="language-python">class matmul(Operation):
+    """Multiplies matrix a by matrix b, producing a * b.
+    """
+
+    def __init__(self, a, b):
+        """Construct matmul
+
+        Args:
+          a: First matrix
+          b: Second matrix
+        """
+        super().__init__([a, b])
+
+    def compute(self, a_value, b_value):
+        """Compute the output of the matmul operation
+
+        Args:
+          a_value: First matrix value
+          b_value: Second matrix value
+        """
+        return a_value.dot(b_value)</code></pre>
+
+        <h2 id="Placeholders">Placeholders</h2>
+        <p>Not all the nodes in a computational graph are operations. For example, in the affine transformation graph,
+            $A$, $x$ and $b$ are not operations. Rather, they are inputs to the graph that have to be supplied with a
+            value once we want to compute the output of the graph. To provide such values, we introduce <strong>placeholders</strong>.
+        </p>
+        <pre><code class="language-python">class placeholder:
+    """Represents a placeholder node that has to be provided with a value
+       when computing the output of a computational graph
+    """
+
+    def __init__(self):
+        """Construct placeholder
+        """
+        self.consumers = []
+
+        # Append this placeholder to the list of placeholders in the currently active default graph
+        _default_graph.placeholders.append(self)</code></pre>
+
+
+        <h2 id="Variables">Variables</h2>
+        <p>In the affine transformation graph, there is a qualitative difference between $x$ on the one hand and $A$ and
+            $b$ on the other hand. While $x$ is an input to the operation, $A$ and $b$ are <strong>parameters</strong>
+            of the operation, i.e. they are intrinsic to the graph. We will refer to such parameters as <strong>Variables</strong>.
+        </p>
+        <pre><code class="language-python">class Variable:
+    """Represents a variable (i.e. an intrinsic, changeable parameter of a computational graph).
+    """
+
+    def __init__(self, initial_value=None):
+        """Construct Variable
+
+        Args:
+          initial_value: The initial value of this variable
+        """
+        self.value = initial_value
+        self.consumers = []
+
+        # Append this variable to the list of variables in the currently active default graph
+        _default_graph.variables.append(self)</code></pre>
+
+        <h2 id="The-Graph-class">The Graph class</h2>
+        <p>Finally, we'll need a class that bundles all the operations, placeholders and variables together. When
+            creating a new graph, we can call its <code>as_default</code> method to set the <code>_default_graph</code>
+            to this graph. This way, we can create operations, placeholders and variables without having to pass in a
+            reference to the graph everytime.</p>
+        <pre><code class="language-python">class Graph:
+    """Represents a computational graph
+    """
+
+    def __init__(self):
+        """Construct Graph"""
+        self.operations = []
+        self.placeholders = []
+        self.variables = []
+
+    def as_default(self):
+        global _default_graph
+        _default_graph = self</code></pre>
+
+        <h2 id="Example">Example</h2>
+        <p>Let's now use the classes we have built to create a computational graph for the following affine
+            transformation:</p>
+        <p>$$<br/>z = \begin{pmatrix}<br/>1 &amp; 0 \\<br/>0 &amp; -1<br/>\end{pmatrix}<br/>\cdot<br/>x<br/>+<br/>\begin{pmatrix}<br/>1
+            \\<br/>1<br/>\end{pmatrix}<br/>$$</p>
+        <pre><code class="language-python"># Create a new graph
+Graph().as_default()
+
+# Create variables
+A = Variable([[1, 0], [0, -1]])
+b = Variable([1, 1])
+
+# Create placeholder
+x = placeholder()
+
+# Create hidden node y
+y = matmul(A, x)
+
+# Create output node z
+z = add(y, b)</code></pre>
+
+        <h2 id="Computing-the-output-of-an-operation">Computing the output of an operation</h2>
+        <p>Now that we are confident creating computational graphs, we can start to think about how to compute the
+            output of an operation.</p>
+        <p>Let's create a Session class that encapsulates an execution of an operation. We would like to be able to
+            create a session instance and call a <code>run</code> method on this instance, passing the operation that we
+            want to compute and a dictionary containing values for the placeholders:</p>
+        <pre><code class="language-python">session = Session()
+output = session.run(z, {
+    x: [1, 2]
+})
+
+</code></pre>
+        <p>This should compute the following value:</p>
+        <p>$$<br/>z = \begin{pmatrix}<br/>1 &amp; 0 \\<br/>0 &amp;
+            -1<br/>\end{pmatrix}<br/>\cdot<br/>\begin{pmatrix}<br/>1 \\<br/>2<br/>\end{pmatrix}<br/>+<br/>\begin{pmatrix}<br/>1
+            \\<br/>1<br/>\end{pmatrix}<br/>=<br/>\begin{pmatrix}<br/>2 \\<br/>-1<br/>\end{pmatrix}<br/>$$</p>
+        <p>In order to compute the function represented by an operation, we need to apply the computations in the right
+            order. For example, we cannot compute $z$ before we have computed $y$ as an intermediate result. Therefore,
+            we have to make sure that the operations are carried out in the right order, such that the values of every
+            node that is an input to an operation $o$ has been computed before $o$ is computed. This can be achieved via
+            <a href="https://en.wikipedia.org/wiki/Tree_traversal#Post-order" target="new" rel="noopener">post-order
+                traversal</a>.</p>
+        <pre><code class="language-python">import numpy as np
+
+
+class Session:
+    """Represents a particular execution of a computational graph.
+    """
+
+    def run(self, operation, feed_dict={}):
+        """Computes the output of an operation
+
+        Args:
+          operation: The operation whose output we'd like to compute.
+          feed_dict: A dictionary that maps placeholders to values for this session
+        """
+
+        # Perform a post-order traversal of the graph to bring the nodes into the right order
+        nodes_postorder = traverse_postorder(operation)
+
+        # Iterate all nodes to determine their value
+        for node in nodes_postorder:
+
+            if type(node) == placeholder:
+                # Set the node value to the placeholder value from feed_dict
+                node.output = feed_dict[node]
+            elif type(node) == Variable:
+                # Set the node value to the variable's value attribute
+                node.output = node.value
+            else:  # Operation
+                # Get the input values for this operation from node_values
+                node.inputs = [input_node.output for input_node in node.input_nodes]
+
+                # Compute the output of this operation
+                node.output = node.compute(*node.inputs)
+
+            # Convert lists to numpy arrays
+            if type(node.output) == list:
+                node.output = np.array(node.output)
+
+        # Return the requested node value
+        return operation.output
+
+
+def traverse_postorder(operation):
+    """Performs a post-order traversal, returning a list of nodes
+    in the order in which they have to be computed
+
+    Args:
+       operation: The operation to start traversal at
+    """
+
+    nodes_postorder = []
+
+    def recurse(node):
+        if isinstance(node, Operation):
+            for input_node in node.input_nodes:
+                recurse(input_node)
+        nodes_postorder.append(node)
+
+    recurse(operation)
+    return nodes_postorder</code></pre>
+
+        <p>Let's test our class on the example from above:</p>
+        <pre><code class="language-python">session = Session()
+output = session.run(z, {
+    x: [1, 2]
+})
+print(output)</code></pre>
+
+
+        <p>Looks good.</p>
+        <p>If you have any questions, feel free to leave a comment. Otherwise, continue with the next part: <a
+                href="/deep-learning-from-scratch-ii-perceptrons/">II: Perceptrons</a>.</p>
+
+    </article>
+
+    <footer class="site-footer">
+        © Daniel Sabinasz · <a href="../index.html">Home</a>
+    </footer>
+
+</main>
+<script>hljs.highlightAll();</script>
+</body>
+</html>

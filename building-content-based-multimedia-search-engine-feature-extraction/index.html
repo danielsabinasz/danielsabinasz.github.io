@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Building a Content-Based Multimedia Search Engine II: Extracting Feature Vectors</title>
+    <meta name="description"
+          content="This is part 2 in a series of tutorials in which we learn how to build a content-based search engine that retrieves multimedia objects based on their content rather than based on keywords, title or meta description.">
+    <link rel="stylesheet" href="../styles.css">
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+<main class="page wide">
+
+    <a class="backlink" href="../index.html">Daniel Sabinasz</a>
+
+    <article>
+        <header class="doc-header">
+            <h1>Building a Content-Based Multimedia Search Engine II: Extracting Feature Vectors</h1>
+            <div class="doc-meta">
+                Living Document · Version 1.0 · last revised 8 Mar 2018
+            </div>
+        </header>
+
+
+        <p>This is part 2 in a series of tutorials in which we learn how to build a content-based search engine that
+            retrieves multimedia objects based on their content rather than based on keywords, title or meta
+            description.</p>
+        <ul>
+            <li><a href="/building-content-based-multimedia-search-engine-quantifying-similarity/">Part I: Quantifying
+                Similarity</a></li>
+            <li><a href="/building-content-based-multimedia-search-engine-feature-extraction/">Part II: Extracting
+                Feature Vectors</a></li>
+            <li><a href="/building-content-based-multimedia-search-engine-feature-signatures/">Part III: Feature
+                Signatures</a></li>
+            <li><a href="/building-content-based-multimedia-search-engine-earth-movers-distance/">Part IV: Earth Mover's
+                Distance</a></li>
+            <li><a href="/building-content-based-multimedia-search-engine-signature-quadratic-form-distance/">Part V:
+                Signature Quadratic Form Distance</a></li>
+            <li><a href="/building-content-based-multimedia-search-engine-efficient-query-processing">Part VI: Efficient
+                Query Processing</a></li>
+        </ul>
+        <p>In the <a href="/building-content-based-search-engine-quantifying-similarity/">previous section</a>, we saw
+            how similarity between multimedia objects can be formalized and which types of queries exist with respect to
+            this formalization. In a step towards efficiently computing similarity between two multimedia objects, we
+            are now going to see how we can characterize the contents of individual multimedia objects (in our example,
+            a video) by extracting a set of so-called <strong>feature vectors</strong>, which are vectors from the
+            Euclidean space that describe certain local characteristic properties.</p>
+
+        <p>Since we are interested in visual similarity between two videos, our goal is to extract a set of vectors,
+            each of which describes certain local visual properties of the video numerically. This process can be
+            depicted visually as follows:</p>
+        <img class="wp-image-513"
+                                                                          title="Extracting feature vectors from videos"
+                                                                          src="img.png"
+                                                                          alt="Extracting feature vectors from videos"
+                                                                          width="500" height="374"/>
+        <p>We first select a certain amount of sample frames from the video (e.g. 10 frames per second). For each of
+            these frames, we select a fixed amount of equidistant sample pixels. Finally, for each sample pixel, we
+            compute an 8-dimensional Euclidean vector $(x, y, L, a, b, \chi, \eta, t)$ describing the visual appearance
+            of the pixel and its context. The choice of this vector is just a suggestion and it isn't necessary to
+            include all of features presented here.</p>
+
+        <p>The first two dimensions of this vector correspond to the x and y coordinates of the pixel inside the frame.
+            The next 3 dimensions correspond to the color of the pixel in the <strong>L*a*b* color space</strong>, i.e.
+            the lightness, the position between red and green and the position between blue and yellow (cf. [Wik15b]).
+            The reason we choose this color space instead of e.g. RGB is the fact that Euclidean distances in this space
+            have a significantly higher correlation with perceptual dissimilarity than other color spaces, making it
+            more suitable for our task of measuring visual similarity. Additionally, we calculate the
+            <strong>contrast</strong>&nbsp;$\chi$ of a 12 x 12 neighborhood of the pixel as proposed by Tamura et al. in
+            [TMY78], which is a measure of the dynamic range of the colors.&nbsp;Furthermore, we calculate the <strong>coarseness</strong>
+            $\eta$ of the pixel, as proposed in [TMY78], which is a measure of how big the structures surrounding that
+            pixel are. Finally, we add the time t of the frame from which the pixel was sampled as another dimension (in
+            seconds from the beginning of the video).</p>
+        <p>The whole set of extracted feature vectors, then, comprises a summary of how the visual contents of the video
+            unfold over time.</p>
+
+        <p>The entries of the vectors all measure different aspects and stem from different ranges. Since we want all
+            dimensions to have equal importance in the distance computations, irrespective of their value range, we
+            normalize all 8 dimensions individually, yielding a vector whose entries lie between 0 and 1: The positions
+            x and y are divided by the image width and height, respectively. The L* color coordinate ranges from 0 to
+            100 and is hence divided by 100. The a* and b* color coordinates range from -128 to 127. Therefore, we add
+            128 and divide by 255. The contrast $\chi$ ranges from 0 to 128 and is therefore divided by 128. The
+            coarseness $\eta$ ranges from 0 to 5 and is hence divided by 5. Finally, the time is divided by the video
+            duration.</p>
+
+
+        <p>The first 7 dimensions that describe a pixel in the context of its frame have yielded high effectiveness for
+            the task of retrieving visually similar images (cf. [BUS10a]) and were hence adopted. Since a video can be
+            thought of as a generalization of an image along another dimension (the time dimension), the image retrieval
+            approach was extended simply by adding the time as another dimension to the feature vectors. The rationale
+            for this is that there is no conceptual difference between the spatial dimensions and the time dimension. A
+            video can be imagined to be an image changing over time. The fact that a video is usually represented as a
+            sequence of frames is just a way to store a video digitally, and it has lead many of the video retrieval
+            approaches to base their video representations on frame sequences, even though semantically a video can be
+            treated reasonably as an image changing continuously over time rather than as a sequence of images.</p>
+
+        <p>We now know how we can express local visual properties of a video by means of a set of feature vectors. In
+            the next section, we will see how we can summarize these vectors into a more compact representation scheme
+            that allows us to store the contents of the video using less space, and to compute the visual similarity
+            between two videos more efficiently. Continue with the next section: <a
+                    href="/building-content-based-search-engine-feature-signatures/">Feature Signatures</a></p>
+        <h2>References</h2>
+        <p>[Wik15b] Wikipedia. <em>Lab color space</em> <a href="http://en.wikipedia.org/wiki/Lab_color_space">http://en.wikipedia.org/wiki/Lab_color_space</a>,
+            2015.<br/>[TMY78] Hideyuki Tamura, Shunji Mori, and Takashi Yamawaki. <em>Textural features corresponding to
+                visual perception.</em> IEEE Transactions on Systems, Man and Cybernetics, 8(6):460&ndash;473,
+            1978.<br/>[BUS10a]&nbsp;Christian Beecks, Merih Seran Uysal, and Thomas Seidl. <em>A comparative study of
+                similarity measures for content-based multimedia retrieval.</em> In Multimedia and Expo (ICME), 2010
+            IEEE International Conference on, pages 1552&ndash;1557. IEEE, 2010.</p>
+
+
+    </article>
+
+    <footer class="site-footer">
+        © Daniel Sabinasz · <a href="../index.html">Home</a>
+    </footer>
+
+</main>
+</body>
+</html>

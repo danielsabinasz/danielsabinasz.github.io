@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Building a Content-Based Multimedia Search Engine III: Feature Signatures</title>
+    <meta name="description"
+          content="This is part 3 in a series of tutorials in which we learn how to build a content-based search engine that retrieves multimedia objects based on their content rather than based on keywords, title or meta description.">
+    <link rel="stylesheet" href="../styles.css">
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+<main class="page wide">
+
+    <a class="backlink" href="../index.html">Daniel Sabinasz</a>
+
+    <article>
+        <header class="doc-header">
+            <h1>Building a Content-Based Multimedia Search Engine III: Feature Signatures</h1>
+            <div class="doc-meta">
+                Living Document · Version 1.0 · last revised 29 Mar 2018
+            </div>
+        </header>
+
+        <p>This is part 3 in a series of tutorials in which we learn how to build a content-based search engine that
+            retrieves multimedia objects based on their content rather than based on keywords, title or meta
+            description.</p>
+        <ul>
+            <li><a href="/building-content-based-multimedia-search-engine-quantifying-similarity/">Part I: Quantifying
+                Similarity</a></li>
+            <li><a href="/building-content-based-multimedia-search-engine-feature-extraction/">Part II: Extracting
+                Feature Vectors</a></li>
+            <li><a href="/building-content-based-multimedia-search-engine-feature-signatures/">Part III: Feature
+                Signatures</a></li>
+            <li><a href="/building-content-based-multimedia-search-engine-earth-movers-distance/">Part IV: Earth Mover's
+                Distance</a></li>
+            <li><a href="/building-content-based-multimedia-search-engine-signature-quadratic-form-distance/">Part V:
+                Signature Quadratic Form Distance</a></li>
+            <li><a href="/building-content-based-multimedia-search-engine-efficient-query-processing">Part VI: Efficient
+                Query Processing</a></li>
+        </ul>
+        <p>When computing the distance between two multimedia objects, it would be highly inefficient to take into
+            account all of the extracted feature vectors. For most practical purposes, however, it is not necessary to
+            do this in order to achieve a good discriminability of the objects. Most of the vectors carry redundant
+            information or fine-grained details that do not have a significant influence on the overall similarity of
+            two objects. Hence, we summarize all of the extracted features into a structure called a <strong>feature
+                signature</strong>.</p>
+        <p>Intuitively, a feature signature is characterized by a relatively small set of feature vectors, called the
+            <strong>representatives</strong>, along with a weight for each representative.</p>
+        <p>Formally, if we let $\mathbb{F}$ denote the set of all possible features, a feature signature $X$ is a
+            function $X : \mathbb{F} \rightarrow \mathbb{R}$ such that $|\{f \in \mathbb{F} \; | \; X(f) = 0\}| &lt;
+            \infty$ (i.e. it assigns a weight to only a finite number of vectors and assigns 0 everywhere else). We
+            refer to $R_X =|\{f \in \mathbb{F} \; | \; X(f) = 0\}|$ as the representatives of $X$. We use $\mathbb{S}$
+            to refer to the set of all feature signatures.</p>
+        <p>A common way to calculate a feature signature is to apply a clustering algorithm (e.g. <a
+                href="https://en.wikipedia.org/wiki/K-means_clustering">k-means</a>) to the extracted set of feature
+            vectors. From the resulting clustering, we devise a feature signature by defining the cluster means as the
+            representatives and assigning them a weight corresponding to the relative size of the cluster, i.e. the
+            number of cluster elements divided by the total number of extracted features. Here is an example depicting
+            this process for 2-dimensional feature vectors:</p>
+        <p><img class="aligncenter wp-image-538 size-large"
+                src="img1.png"
+                alt="" style="max-width: 100%;"/></p>
+        <p>First, the vectors are clustered, yielding 3 clusters (red, green and blue).&nbsp;Then we compute the cluster
+            centers (depicted as the large red, green and blue dots), which we define as the representatives of the
+            feature signature S, and assign them a weight corresponding to the relative cluster size (i.e. the number of
+            feature vectors in the cluster divided by the total number of feature vectors).</p>
+        <p>Let's formalize this process. Let $C = C_1, ..., C_m$ be a clustering of feature vectors. We define the
+            clustering-induced normalized feature signature $X_C$ as $X_C : \mathbb{F} \rightarrow \mathbb{R}$ with:</p>
+        <p>$$<br/>X_C(f)=<br/>\begin{cases}<br/>\frac{|C_i|}{\sum_{1 \leq j \leq m} |C_j|} &amp; \text{if } f =
+            \frac{1}{|C_i|} \sum_{g \in C_i} g\\<br/>0 &amp; \text{else}<br/>\end{cases}<br/>$$</p>
+        <p>Before applying the clustering algorithm, we multiply each dimension by a certain weight, which allows us to
+            control the importance of that dimension for the clustering. When using k-means to calculate the clustering,
+            we can specify the desired number of representatives k in advance. This allows us to control the
+            expressiveness of the feature signature. The higher we choose k, the more expressive the feature signature
+            gets, with the downside of increasing the storage size and the computational complexity of the distance
+            computation. There is a monotonous relation between k and the effectiveness (i.e. adequacy of the results)
+            as well as the query processing time. Hence, k allows us to control the tradeoff between effectiveness and
+            efficiency.</p>
+        <p>The following image depicts 3D visualizations of two videos and their feature signatures with k = 100. Here,
+            the clusters are represented as spheres. Their position in the 3D coordinate system corresponds to the
+            position (x and y) and the time (t), the color of the sphere corresponds to the L*a*b* color dimensions of
+            the representatives and the volume of the sphere corresponds to the weight that the feature signature
+            assigns to the representative. As we can see, the feature signature summarizes the visual content of the
+            video as it unfolds over time using just 100 vectors.</p>
+        <p><img class="aligncenter wp-image-540 size-large"
+                src="img2.png"
+                alt="" style="max-width:100%;"/></p>
+        <p>We have seen how feature signatures reduce the rather large amount of information inherent in the feature
+            vectors into a compact representation that still reveals a lot of information about the feature
+            distribution, since it summarizes how many feature vectors are located at which locations in the feature
+            space. In the next section, we will see how we can compute the similarity between two feature signatures.
+            Continue with the next section:&nbsp;<a href="/building-content-based-search-engine-earth-movers-distance/">Earth
+                Mover's Distance</a></p>
+
+    </article>
+
+    <footer class="site-footer">
+        © Daniel Sabinasz · <a href="../index.html">Home</a>
+    </footer>
+
+</main>
+</body>
+</html>

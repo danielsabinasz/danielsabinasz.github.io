@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Building a Content-Based Multimedia Search Engine V: Signature Quadratic Form Distance</title>
+    <meta name="description"
+          content="This is part 5 in a series of tutorials in which we learn how to build a content-based search engine that retrieves multimedia objects based on their content rather than based on keywords, title or meta description.">
+    <link rel="stylesheet" href="../styles.css">
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+<main class="page wide">
+
+    <a class="backlink" href="../index.html">Daniel Sabinasz</a>
+
+    <article>
+        <header class="doc-header">
+            <h1>Building a Content-Based Multimedia Search Engine V: Signature Quadratic Form Distance</h1>
+            <div class="doc-meta">
+                Living Document · Version 1.0 · last revised 4 Oct 2018
+            </div>
+        </header>
+
+        <p>This is part 5 in a series of tutorials in which we learn how to build a content-based search engine that retrieves multimedia objects based on their content rather than based on keywords, title or meta description.</p>
+        <ul>
+            <li><a href="/building-content-based-multimedia-search-engine-quantifying-similarity/">Part I: Quantifying Similarity</a></li>
+            <li><a href="/building-content-based-multimedia-search-engine-feature-extraction/">Part II: Extracting Feature Vectors</a></li>
+            <li><a href="/building-content-based-multimedia-search-engine-feature-signatures/">Part III: Feature Signatures</a></li>
+            <li><a href="/building-content-based-multimedia-search-engine-earth-movers-distance/">Part IV: Earth Mover's Distance</a></li>
+            <li><a href="/building-content-based-multimedia-search-engine-signature-quadratic-form-distance/">Part V: Signature Quadratic Form Distance</a></li>
+            <li><a href="/building-content-based-multimedia-search-engine-efficient-query-processing">Part VI: Efficient Query Processing</a></li>
+        </ul>
+        <p>We have seen how we can compare two multimedia objects with respect to their similarity by computing the Earth Mover's Distance on their feature signatures. To this date, the Earth Mover's Distance has been shown experimentally to be the most effective distance measure on feature signatures, i.e. it captures the way that human beings judge the perceptual dissimilarity between the objects most adequately. However, we have also seen that the computational complexity of the Earth Mover's Distance lies somewhere between&nbsp;$\mathcal{O}(n^3)$ and $\mathcal{O}(n^4)$, where $n$ is the total number of representatives of the two compared signatures. For large-scale multimedia retrieval applications, this becomes unfeasible.</p>
+        <p>An alternative distance measure, which is almost as effective as the Earth Mover's Distance but significantly more efficient to compute, is the <strong>Signature Quadratic Form Distance&nbsp;</strong>(SQFD). It has been proposed in&nbsp;[BUS10b] and can be&nbsp;thought of as an adaption of the Quadratic Form Distance [FBF+94], a distance measure on histograms, to feature signatures.</p>
+        <p>Let X, Y be two feature signatures and let $s : \mathbb{F} \times \mathbb{F} \rightarrow \mathbb{R}^{\geq 0}$ be a similarity function on features.&nbsp;The Signature Quadratic Form Distance $SQFD_s : \mathbb{S} \times \mathbb{S} \rightarrow \mathbb{R}^{\geq 0}$ is defined as<br />$$SQFD_s(X, Y) = \sqrt{&lt;X-Y, X-Y&gt;_s}$$<br />where $&lt;X, Y&gt;_s : \mathbb{S} \times \mathbb{S} \rightarrow \mathbb{R}^{\geq 0}$ is the Similarity Correlation, which is defined as<br />$$&lt;X, Y&gt;_s = \sum_{f \in R_X} \sum_{g \in R_Y} X(f) Y(g) s(f, g)$$&nbsp;</p>
+        <p>Intuitively, the similarity correlation yields high values if representatives that are similar to each other also have high weights. If, on the other hand, the weight in one signature is distributed in distinct (i.e. dissimilar) regions of the feature space than for the other signature, it assigns low values. Therefore, $&lt;X, Y&gt;_s$ is a measure of the similarity of the two signatures.</p>
+        <p>$X-Y$ refers to the difference between the two feature signatures, which is defined as a new feature signature such that $(X-Y)(f) = X(f) - Y(f)$. The term $&lt;X-Y, X-Y&gt;_s$&nbsp;yields the self-similarity of this difference . If $X = Y$, this value is 0. The more dissimilar $X$ and $Y$ are, the higher the distance value will be.</p>
+        <p>The previous definition pre-supposes some similarity function $s$ on feature vectors. Recall from <a href="/building-content-based-search-engine-quantifying-similarity/">Part 1: Quantifying Similarity</a> that a similarity function&nbsp;assigns small values to objects that are dissimilar and larger values to objects that are more similar, reaching its maximum when the two compared objects are the same. Given some distance function $\delta$ on feature vectors (an obvious choice being the <a href="https://en.wikipedia.org/wiki/Euclidean_distance">Euclidean Distance</a> or the <a href="https://en.wikipedia.org/wiki/Taxicab_geometry">Manhattan Distance</a>), we can define a similarity function by means of the <strong>Gaussian kernel</strong>:</p>
+        <p>$$s(f, g) = e^{-\frac{\delta(f, g)}{2\sigma^2}}$$</p>
+        <p>For a distance of 0, this similarity function yields a value of 1. For increasing distances, the similarity exponentially decays to 0. $\sigma$ controls the speed of this exponental decay, with larger values leading to a slower decay.</p>
+        <p>As we can see from the definition, the run-time complexity for computing the Signature Quadratic Form Distance is $\mathcal{O}(n^2)$, making it significantly more feasible than the Earth Mover's Distance. Moreover, as opposed to the Earth Mover's Distance, the computation of the sum can be fully parallelized on a GPU, effectively resulting in constant computation time for most signatures (see [KLBSS11]). Finally, it can be shown that the Signature Quadratic Form Distance is a metric, which will become important for indexing methods, as will be detailed in the next section.</p>
+        <p>While the Earth Mover's Distance is slightly more effective than the Signature Quadratic Form Distance (see [BS13] for experimental comparisons), this difference may or may not be worth the increased computational complexity. The choice between the two distance metrics should therefore be based on the requirements of the project at hand.</p>
+        <p>We are now able to compute the similarity between arbitrary feature signatures. This effectively allows us to retrieve similar multimedia objects to a given query object. However, as of now, we would have to compute the distance between the query object and every single object in the database. If our database is large, this can lead to unacceptable computational demands and query times. For this reason, we are going to introduce indexing methods in the next section. These will allow us to retrieve similar objects to a query object without having to compute all distance values explicitly. Continue with the next section:&nbsp;<a href="/building-content-based-search-engine-efficient-query-processing">Efficient Query Processing</a></p>
+        <h2>References</h2>
+        <p>[BUS10b]&nbsp;Christian Beecks, Merih Seran Uysal, and Thomas Seidl. <em>Signature quadratic form distance</em>. In Proceedings of the ACM International Conference on Image and Video Retrieval, pages 438&ndash;445. ACM, 2010.</p>
+        <p>[BS13]&nbsp;Christian Beecks and Thomas Seidl. <em>Distance based similarity models for content based multimedia retrieval</em>. PhD thesis, Aachen, 2013. Zsfassung in dt. und engl. Sprache; Aachen, Techn. Hochsch., Diss., 2013.</p>
+        <p>[KLBSS11] Kruli&scaron;, M., Lokoč, J., Beecks, C., Skopal, T., &amp; Seidl, T. (2011, October). <em>Processing the signature quadratic form distance on many-core gpu architectures</em>. In: Proceedings of the 20th ACM international conference on Information and knowledge management&nbsp;(pp. 2373-2376). ACM.</p>
+    </article>
+
+    <footer class="site-footer">
+        © Daniel Sabinasz · <a href="../index.html">Home</a>
+    </footer>
+
+</main>
+</body>
+</html>

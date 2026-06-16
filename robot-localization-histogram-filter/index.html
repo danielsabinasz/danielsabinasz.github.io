@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Robot Localization II: The Histogram Filter — Daniel Sabinasz</title>
+    <meta name="description"
+          content="This is part 2 in a series of articles explaining methods for robot localization, i.e. determining and tracking a robot's location via noisy sensor measurements.">
+    <link rel="stylesheet" href="../styles.css">
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+<main class="page wide">
+
+    <a class="backlink" href="../index.html">Daniel Sabinasz</a>
+
+    <article>
+        <header class="doc-header">
+            <h1>Robot Localization II: The Histogram Filter</h1>
+            <div class="doc-meta">
+                Living Document · Version 1.0 · last revised 15 Sep 2017
+            </div>
+        </header>
+
+        <p>This is part 2 in a series of articles explaining methods for robot localization, i.e. determining and
+            tracking a robot's location via noisy sensor measurements. You should start with the first part: <a
+                    href="/robot-localization-recursive-bayesian-estimation/">Robot Localization I: Recursive Bayesian
+                Estimation</a></p>
+        <h3>Idea</h3>
+        <p>The <strong>Histogram Filter</strong>&nbsp;is the most straightforward solution to represent continuous
+            beliefs. We simply divide $dom(x_t)$ into $n$ disjoint bins $b_0, ..., b_{n&minus;1}$ such that $\cup_i
+            b_{i} = dom(x_t)$. Then we define a new state $x_t^\prime \in \{0, ..., n &minus; 1\}$ where $x_t^\prime =
+            i$ if and only if $x_t \in b_i$. Since $x_t^\prime$ has a discrete, finite state space, we can use the
+            discrete Bayes Filter to calculate $bel(x_t^\prime)$.</p>
+        <p>$bel(x_t^\prime)$ is an approximation for&nbsp;$bel(x_t)$ then: For each bin $b_i$, it gives us the
+            probability that $x_t$ is in that bin. The more bins we use, the more accurate the approximation becomes,
+            with the downside of increasing computational complexity.</p>
+        <h3>Example</h3>
+        <p>To make this more clear, we shall apply the Histogram Filter to a global localization example as displayed in
+            the following image:</p>
+        <p><img class="aligncenter wp-image-234 size-full"
+                src="img.png" alt=""
+                width="686" height="174"/></p>
+        <p>A self-driving car lives in a one-dimensional, cyclic world that is 5 meters wide. By cyclic, we mean that if
+            it is in the rightmost cell and moves one step to the right, it's back in the leftmost cell. The robot&rsquo;s
+            position at each time step is given as $pos_t \in [0, 5)$, which is the only state variable. It has a sensor
+            that is, under uncertainty, able to tell the color of the wall next to it. We assume that the car is
+            constantly moving right under noise, at an expected speed of one meter per time step.</p>
+        <p>In order to apply the Histogram Filter, we choose the following decomposition of the state space: $b_0 = [0,
+            1)$, $b_1 = [1, 2)$, $b_2 = [2, 3)$, $b_3 = [3, 4)$, $b_4 = [4, 5)$. This way, the position can be measured
+            as a discrete variable $pos_t^\prime \in \{0, ..., 4\}$, which is an estimate of the true, continuous
+            position. Each discrete position corresponds to exactly one of the distinguished grid cells in the above
+            image.</p>
+        <p>We can now specify the transition and sensor models. We assume that the car intends to move exactly one grid
+            cell to the right at each time step, but that the inaccuracy of the motor causes it to move 2 grid cells in
+            5% of the cases, not move at all in 5% of the cases and move exactly 1 grid cell in 90% of the cases. This
+            results in the following transition model:</p>
+        <p>$$\begin{align*}
+            P(pos_t^\prime = x + 2 \; mod \, 5 \; \vert \; pos_{t−1}^\prime = x) = 0.05\\
+            P(pos_t^\prime = x + 1 \; mod \, 5 \; \vert \; pos_{t−1}^\prime = x) = 0.9\\
+            P(pos_t^\prime = x \; \vert \; pos_{t−1}^\prime = x) = 0.05
+            \end{align*}$$</p>
+        <p>As for the sensors, we assume that in 90% of the cases the measured color is correct and in 10% of the cases
+            it is incorrect, yielding the following sensor model:</p>
+        <p>$$\begin{align*}
+            P(MeasuredColor_t = Blue \; \vert \; pos_t^\prime = 0, 2, 3) = 0.9\\
+            P(MeasuredColor_t = Orange \; \vert \; pos_t^\prime = 0, 2, 3) = 0.1\\
+            P(MeasuredColor_t = Blue \; \vert \; pos_t^\prime = 1, 4) = 0.1\\
+            P(MeasuredColor_t = Orange \; \vert \; pos_t^\prime = 1, 4) = 0.9
+            \end{align*}$$</p>
+        <p>Let&rsquo;s now use the discrete Bayes filter to calculate the car's belief for three time steps where the
+            sensor measurements are Orange, Blue and Orange in that order. We assume that the car starts at the very
+            left (but it does not know that it does) and travels exactly one grid cell to the right per time step (which
+            it does not know either).&nbsp;We can represent the belief as a 5-dimensional row vector $bel(pos_t^\prime)
+            = (bel_{t,1}, bel_{t,2} bel_{t,3}, bel_{t,4}, bel_{t,5})$ where $bel_{t,i}$ represents the probability that
+            the robot is in cell $i$ at time-step $t$.</p>
+        <h4>t = 0</h4>
+        <p>The car has no prior knowledge about its position. Thus, it starts out with the following belief:</p>
+        <p>$bel(pos_0^\prime) = (0.2, 0.2, 0.2, 0.2, 0.2)$</p>
+        <h4>t = 1</h4>
+        <p>First, it projects the previous belief to the current time step:<br/>$\overline{bel}(pos_1^\prime) =
+            \sum_{pos_0^\prime} P(pos_1^\prime \; \vert \; pos_0^\prime) \cdot bel(pos_0^\prime)$<br/>$= (0.05, 0.9,
+            0.05, 0.0, 0.0) \cdot 0.2 + (0.0, 0.05, 0.9, 0.05, 0.0) \cdot&nbsp;0.2$<br/>$+ (0.0, 0.0, 0.05, 0.9, 0.05)
+            \cdot&nbsp;0.2 + (0.05, 0.0, 0.0, 0.05, 0.9) \cdot&nbsp;0.2$<br/>$+ (0.9, 0.05, 0.0, 0.0, 0.05) \cdot&nbsp;0.2
+            = (0.2, 0.2, 0.2, 0.2, 0.2)$</p>
+        <p>This results in the same belief as before, which shouldn&rsquo;t surprise us, since each cell was equally
+            likely to be the car's position at time $t = 0$ and therefore, since the robot just moved blindly, each cell
+            is still equally likely to be its position at time $t = 1$.</p>
+        <p>Now the robot updates the projected belief with the sensor input:</p>
+        <p>$bel(pos_1^\prime) = \eta \cdot P(MeasuredColor_1 = Orange \; \vert \; pos_1^\prime) \cdot
+            \overline{bel}(pos_1^\prime)$<br/>$= \eta \cdot&nbsp;(0.1, 0.9, 0.1, 0.1, 0.9) \cdot (0.2, 0.2, 0.2, 0.2,
+            0.2)$<br/>$= \eta \cdot (0.02, 0.18, 0.02, 0.02, 0.18)$<br/>$= (0.04762, 0.42857, 0.04762, 0.04761,
+            0.42857)$</p>
+        <p>where the last step follows by dividing the vector by the sum over all vector values so that the
+            probabilities sum up to 1. We can see that each of the two orange cells are equally likely to have caused
+            the sensor measurement. Thus, the robot currently has two salient theories on where it might be.</p>
+        <h4>t = 2</h4>
+        <p>$\overline{bel}(pos_2^\prime) = \sum_{pos_1^\prime} P(pos_2^\prime \; \vert \; pos_1^\prime) \cdot
+            bel(pos_1^\prime)$<br/>$= (0.39048, 0.08571, 0.39048, 0.06667, 0.06667)$</p>
+        <p>$bel(pos_2^\prime) = \eta \cdot P(MeasuredColor_2 = Blue \; \vert \; pos_2^\prime) \cdot
+            \overline{bel}(pos_2^\prime)$<br/>$= \eta \cdot&nbsp;(0.9, 0.1, 0.9, 0.9, 0.1) \cdot&nbsp;(0.39048, 0.08571,
+            0.39048, 0.06667, 0.06667)$<br/>$= (0.45165, 0.01102, 0.45165, 0.07711, 0.00857)$</p>
+        <h4>t = 3</h4>
+        <p>$\overline{bel}(pos_3^\prime) = \sum_{pos_2^\prime} P(pos_3^\prime \; \vert \; pos_2^\prime) \cdot
+            bel(pos_2^\prime)$<br/>$= (0.03415, 0.40747, 0.05508, 0.41089, 0.09241)$$bel(pos_3^\prime) = \eta \cdot
+            P(MeasuredColor_3 = Orange \; \vert \; pos_3^\prime) \cdot \overline{bel}(pos_3^\prime)$<br/>$= \eta \cdot
+            (0.1, 0.9, 0.1, 0.1, 0.9) \cdot&nbsp;(0.03415, 0.40747, 0.05508, 0.41089, 0.09241)$<br/>$= (0.00683,
+            0.73358, 0.01102, 0.08219, 0.16637)$</p>
+
+        <p>We can see that after 3 time steps the robot is already about 73% certain that it is in the
+            second grid cell. After another 3 time steps of travelling right and sensing the correct colors,
+            it is 94% certain about its position.</p>
+
+        <p>The disadvantage of the Histogram Filter is obvious: We are not able to tell the probability of each possible
+            state. We are only able to tell the probability that the state is in a certain region of the state space.
+            This disadvantage might be circumvented by using a very fine-grained decomposition of the state space, but
+            this drastically increases the computational complexity.</p>
+        <p>Continue with the next part:&nbsp;<a href="/robot-localization-kalman-filter/">Robot Localization III: The
+            Kalman Filter</a></p>
+    </article>
+
+    <footer class="site-footer">
+        © Daniel Sabinasz · <a href="../index.html">Home</a>
+    </footer>
+
+</main>
+</body>
+</html>

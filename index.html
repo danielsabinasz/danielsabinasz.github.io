@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Daniel Sabinasz</title>
+  <meta name="description" content="Daniel Sabinasz — cognitive scientist, computer scientist, and philosopher of mind. Articles, living research documents, and browser-based software.">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<main class="page wide">
+
+  <!-- ============================ HEADER ============================ -->
+  <header class="site-header">
+    <h1 class="name">Daniel Sabinasz</h1>
+    <p class="intro">
+      I am a researcher and engineer working at the intersection of computer science and
+      cognitive science. With a Ph.D. in Computer Science and an M.Sc. in Cognitive Science,
+      I build intelligent systems while investigating the nature of cognition and understanding.
+      This space documents my research, software development, and writing.
+    </p>
+  </header>
+
+  <!-- ============================ CATEGORY HUB ============================
+       This page is a stable hub. The Writing row opens the single body of
+       work (work.html); Software opens its own page. New content is
+       added there — never on this page.
+       ===================================================================== -->
+  <ul class="hub">
+
+    <li>
+      <a class="hub-item" href="work.html">
+        <span class="hub-head">
+          <span class="hub-title">Writing</span>
+          <span class="hub-arrow">→</span>
+        </span>
+        <p class="hub-desc">Everything I have written — on mind, machine, and the space between.</p>
+      </a>
+    </li>
+
+    <li>
+      <a class="hub-item" href="software.html">
+        <span class="hub-head">
+          <span class="hub-title">Software</span>
+          <span class="hub-arrow">→</span>
+        </span>
+        <p class="hub-desc">Browser-based tools and other things I have built.</p>
+      </a>
+    </li>
+
+  </ul>
+
+  <!-- ============================ FOOTER ============================ -->
+  <footer class="site-footer">
+    <!-- The email span is empty in the source (no address for scrapers, and
+         nothing shown when JS is off). The script below fills it with the
+         separator and a clickable mailto: link only when JS is available. -->
+    © Daniel Sabinasz<span class="email" data-user="daniel" data-domain="sabinasz.net"></span>
+  </footer>
+
+  <script>
+    (function () {
+      var el = document.querySelector('.email');
+      if (!el || !el.dataset.user || !el.dataset.domain) return;
+      var addr = el.dataset.user + '@' + el.dataset.domain;
+      var link = document.createElement('a');
+      link.href = 'mailto:' + addr;
+      link.textContent = addr;
+      el.append(' · ', link);
+    })();
+  </script>
+
+</main>
+</body>
+</html>

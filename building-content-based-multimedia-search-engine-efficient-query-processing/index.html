@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Building a Content-Based Multimedia Search Engine VI: Efficient Query Processing</title>
+    <meta name="description"
+          content="This is part 6 in a series of tutorials in which we learn how to build a content-based search engine that retrieves multimedia objects based on their content rather than based on keywords, title or meta description.">
+    <link rel="stylesheet" href="../styles.css">
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+<main class="page wide">
+
+    <a class="backlink" href="../index.html">Daniel Sabinasz</a>
+
+    <article>
+        <header class="doc-header">
+            <h1>Building a Content-Based Multimedia Search Engine VI: Efficient Query Processing</h1>
+            <div class="doc-meta">
+                Living Document · Version 1.0 · last revised 28 Oct 2018
+            </div>
+        </header>
+
+        <p>This is part 6 in a series of tutorials in which we learn how to build a content-based search engine that
+            retrieves multimedia objects based on their content rather than based on keywords, title or meta
+            description.</p>
+        <ul>
+            <li><a href="/building-content-based-multimedia-search-engine-quantifying-similarity/">Part I: Quantifying
+                Similarity</a></li>
+            <li><a href="/building-content-based-multimedia-search-engine-feature-extraction/">Part II: Extracting
+                Feature Vectors</a></li>
+            <li><a href="/building-content-based-multimedia-search-engine-feature-signatures/">Part III: Feature
+                Signatures</a></li>
+            <li><a href="/building-content-based-multimedia-search-engine-earth-movers-distance/">Part IV: Earth Mover's
+                Distance</a></li>
+            <li><a href="/building-content-based-multimedia-search-engine-signature-quadratic-form-distance/">Part V:
+                Signature Quadratic Form Distance</a></li>
+            <li><a href="/building-content-based-multimedia-search-engine-efficient-query-processing">Part VI: Efficient
+                Query Processing</a></li>
+        </ul>
+        <p>The naive way to process a k-Nearest Neighbor query entails computing the distance between the query object
+            and all database objects, resulting in a time complexity of $\mathcal{O}(|DB|)$ where $|DB|$ refers to the
+            size of the database (cf. [BS13]). If the distance measure is costly to compute, which is usually the case
+            when dealing with complex multimedia objects, this is infeasible. Therefore, we rely on methods that allow
+            us to compute the k-Nearest Neighbors without having to compute the actual distance between the query and
+            all database objects.</p>
+
+        <p>One way to speed up the query processing is by means of a lower bound to the distance function $\delta$, i.e.
+            a function $\delta_{LB} : X \times X \rightarrow \mathbb{R}$ for which it holds that $\delta_{LB}(x, y) \leq
+            \delta(x, y)$ for all $x, y \in X$. If we know that the k-Nearest Neighbors have a distance smaller than or
+            equal to $\epsilon_{max} \in \mathbb{R}$,&nbsp;then we can exclude all objects $o$ for which it holds that
+            $\delta_{LB}(q,o) &gt; \epsilon_{max}$ without computing the actual distance $\delta(q, o)$, since this
+            implies that $\delta(q,o) &gt; \epsilon_{max}$.</p>
+        <p>For most distance functions, lower bounds can be found which are significantly more efficient to compute than
+            the actual distance function, while at the same time allowing us to rule out a large proportion of the
+            database as potential search results.</p>
+        <h2>Multi-Step kNN Algorithm</h2>
+        <p>The <strong>Multi-Step kNN Algorithm</strong>, proposed by Seidl et al. in [SK98], utilizes a lower bound for
+            efficient kNN search by iteratively updating the pruning distance&nbsp;$\epsilon_{max}$ while scanning the
+            database.&nbsp;As shown in [SK98], this algorithm is optimal with respect to the number of performed
+            computations of the utilized distance function $\delta$. Assuming that we have specified multiple lower
+            bounds $\delta_{LB_1}, ...,\delta_{LB_m}$, this algorithm reads as follows:</p>
+        <img class="wp-image-622" style="max-width: 50%;"
+                                                                        src="img.png"
+                                                                        alt=""/></div>
+
+        <p>The efficiency of this algorithm highly depends on the utilized lower bounds. A good lower bound should meet
+            the ICES criteria defined by Assent et al. in [AWS06]: It should be <strong>indexable</strong> such that
+            multidimensional indexing structures like X-Tree or R-Tree can be applied. Furthermore, it should be
+            <strong>complete</strong>, i.e. no false drops occur, which is guaranteed by the lower-bounding property.
+            Moreover, it should be <strong>efficient</strong>, i.e. its computational time complexity should be
+            significantly lower than the complexity of the actual distance function. Finally, it should be <strong>selective</strong>,
+            i.e. it should allow us to exclude as many objects as possible from the actual distance computation, which
+            is achieved by approximating the actual distance as good as possible.</p>
+
+        <p>If the lower bounds have different time complexities and selectivities, then the ordering of the lower bounds
+            plays a role for the efficiency of the algorithm. In each iteration of the outer loop, we skip the actual
+            distance computation when one of the lower bounds exceeds&nbsp;the current pruning radius $\epsilon_{max}$.
+            Hence, a reasonable heuristic in order to skip as early as possible is to sort the lower bounds in ascending
+            order of their time complexities.</p>
+
+        <p>Lower bounds can be devised by exploiting the inner workings of the utilized distance function. There are,
+            however, some lower bounds that are generic in nature, i.e. they are applicable to a wide variety of
+            distance functions, as long as these distance functions fulfill certain properties. In the following, we
+            present a generic lower bound for metric distance functions and lower bounds for the Earth Mover's
+            Distance.</p>
+        <h2>Metric Lower Bound</h2>
+        <p>If we are dealing with a metric distance function, we can exploit the fact that the distance fulfills the
+            triangle inequality to devise a lower bound (cf. [ZADB06]). Given a query $q$, a database object $o$ and a
+            set of so-called pivot objects $P$, it follows from the triangle inequality that</p>
+        <p>$$\delta_{LB-Metric}(q, o) = max_{p \in P} |\delta(q, p) - \delta(p, o)| \leq \delta(q, o)$$</p>
+        <p>The distances $\delta(p, o)$ between all pivot objects $p \in P$ and all database objects $o \in DB$ can be
+            computed in advance and stored in a so-called <strong>pivot table</strong> of size $|P| \cdot |DB|$.&nbsp;When
+            processing a query, we only need to compute the distances $\delta(q, p)$ between the query and all pivot
+            objects $p \in P$ and store those distances in a list. After that, $\delta_{LB-Metric}$ can be computed in
+            $\mathcal{O}(|P|)$ efficiently by looking up the stored distance values. The selectivity of this approach is
+            highly dependent on the choice of pivot objects $P$ and the distribution of the database objects and the
+            query object.</p>
+        <h2>Lower Bounds for the Earth Mover's Distance</h2>
+        <h3>Rubner Lower Bound</h3>
+        <p>As shown by Rubner et al. in [RTG00], when using a norm-induced ground distance, the Earth Mover&rsquo;s
+            Distance can be lower-bounded by the ground distance between the weighted means of the two signatures.</p>
+        <p>Let $X$ be a feature signature and $\delta : \mathbb{F} \times \mathbb{F} \rightarrow \mathbb{R}$ be a
+            norm-induced ground distance. Then it holds that</p>
+        <p>$$Rubner(X, Y) = \delta(\overline{X}, \overline{Y}) \leq EMD_\delta(X, Y)$$</p>
+        <p>where $\overline{X}$ is the weighted mean of $X$:</p>
+        <p>$$\overline{X} = \frac{\sum_{f \in R_X} X(f) \cdot f}{\sum_{f \in R_X} X(f)}$$</p>
+        <h3>Independent Minimization Lower Bound</h3>
+
+        <p>Proposed in [UBSS14], the Independent Minimization Lower Bound for feature signatures (short: IM-Sig) is a
+            lower bound for EMD that corresponds to the EMD when removing the Target constraint and replacing it with
+            the IM-Sig Target constraint defined as follows:</p>
+        <p>$$\forall g \in R_X, h \in R_Y : f(g, h) \leq Y(h)$$</p>
+        <p>Intuitively, this modified target constraint allows to distribute the flow optimally for each representative
+            $g \in R_X$&nbsp;without considering whether the total flow coming into the target representatives exceeds
+            their weights, as long as the flow from $g$ to $h$ does not exceed the weight $Y(h)$ for all target
+            representatives $h \in R_Y$. We use $IMSig_\delta(X,Y)$ to denote the minimum cost flow with respect to the
+            modified target constraint. Since the set of feasible flows for IM-Sig includes the set of feasible flows
+            for EMD, it holds that $IMSig_\delta(X,Y) \leq EMD_\delta(X,Y)$.</p>
+        <p>An efficient algorithm for computing&nbsp;$IMSig_\delta(X,Y)$ is given in&nbsp;[UBSS14].</p>
+        <h2>Putting it all together</h2>
+        <p>Let us review what we have learned so far. In&nbsp;<a
+                href="/building-content-based-search-engine-quantifying-similarity/">Part I: Quantifying Similarity</a>,
+            we have learned how we can quantify the similarity or dissimilarity between two multimedia objects (or
+            representations of these objects) by means of a similarity function or a distance function. Moreover, we
+            have seen the types of query that exist with respect to such functions: The range query and the k-Nearest
+            Neighbor Query. In&nbsp;<a href="/building-content-based-search-engine-feature-extraction/">Part II:
+                Extracting Feature Vectors</a>, we have learned how to extract feature vectors from multimedia objects
+            that capture the visual content of those objects. We have demonstrated this for videos, but the general
+            approach is applicable to a wide variety of other multimedia objects. In&nbsp;<a
+                    href="/building-content-based-search-engine-feature-signatures/">Part III: Feature Signatures</a>,
+            we have learned how we can summarize a set of feature vectors into a compact representation called a feature
+            signature which effectively comprises a compressed summary of the contents of the multimedia object. In&nbsp;<a
+                    href="/building-content-based-search-engine-earth-movers-distance/">Part IV: Earth Mover's
+                Distance</a>&nbsp;and&nbsp;<a
+                    href="/building-content-based-search-engine-signature-quadratic-form-distance">Part V: Signature
+                Quadratic Form Distance</a>, we have learned about two distance measures on these feature signatures
+            that allow us to calculate their dissimilarity and, in effect, the dissimilarity between the two multimedia
+            objects that they represent. In&nbsp;<a
+                    href="/building-content-based-search-engine-efficient-query-processing">Part VI: Efficient Query
+                Processing</a>, we have learned how to perform k-Nearest Neighbor queries efficiently, without having to
+            compute the pairwise distances between the query object and every object in the database.</p>
+        <p>We now have all the necessary components in place to build a multimedia search engine. First of all, the
+            database has to be fed with objects to query. For each of these objects, it should store a previously
+            computed feature signature. If desired, we can generate a pivot table for efficient query processing. Next,
+            a user interface has to be provided, which allows the user to upload a query object. For this query object,
+            a feature signature has to be computed, and subsequently the database of feature signatures can be queried
+            using the multi-step kNN algorithm.</p>
+
+        <h2>References</h2>
+        <p>[AWS06]&nbsp;Ira Assent, Marc Wichterich, and Thomas Seidl. <em>Adaptable distance functions&nbsp;</em><em>for
+            similarity-based multimedia retrieval</em>. Datenbank-Spektrum, 19:23&ndash;31, 2006.</p>
+        <p>[BS13]&nbsp;Christian Beecks and Thomas Seidl. <em>Distance based similarity models for content-based
+            multimedia retrieval</em>. PhD thesis, Aachen, 2013. Zsfassung in dt. und engl. Sprache; Aachen, Techn.
+            Hochsch., Diss., 2013.</p>
+        <p>[RTG00]&nbsp;Yossi Rubner, Carlo Tomasi, and Leonidas J Guibas. <em>The earth mover&rsquo;s distance as a
+            metric for image retrieval</em>. International journal of computer vision, 40(2):99&ndash;121, 2000.</p>
+        <p>[SK98]&nbsp;Thomas Seidl and Hans-Peter Kriegel. <em>Optimal multi-step k-nearest neighbor search</em>. In:
+            ACM SIGMOD Record, volume 27, pages 154&ndash;165. ACM, 1998.</p>
+        <p>[UBSS14]&nbsp;Merih Seran Uysal, Christian Beecks, Jochen Schm&uuml;cking, and Thomas Seidl. <em>Efficient
+            filter approximation using the earth mover&rsquo;s distance in very large multimedia databases with feature
+            signatures</em>. In: Proceedings of the 23rd ACM International Conference on Conference on Information and
+            Knowledge Management, pages 979&ndash;988. ACM, 2014.</p>
+        <p>[ZADB06]&nbsp;Pavel Zezula, Giuseppe Amato, Vlastislav Dohnal, and Michal Batko. <em>Similarity search: the
+            metric space approach</em>, volume 32. Springer Science &amp; Business Media, 2006.</p>
+
+    </article>
+
+    <footer class="site-footer">
+        © Daniel Sabinasz · <a href="../index.html">Home</a>
+    </footer>
+
+</main>
+</body>
+</html>

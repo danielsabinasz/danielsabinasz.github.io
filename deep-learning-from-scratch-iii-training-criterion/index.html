@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Deep Learning From Scratch III: Training criterion</title>
+    <meta name="description"
+          content="This is part 3 of a series of tutorials, in which we develop the mathematical and algorithmic underpinnings of deep neural networks from scratch and implement our own neural network library in Python.">
+    <link rel="stylesheet" href="../styles.css">
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-light.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            document.querySelectorAll('pre').forEach((pre) => {
+                // Create the button
+                const button = document.createElement('button');
+                button.innerText = 'Copy';
+                button.className = 'copy-btn';
+
+                // Add click event
+                button.addEventListener('click', () => {
+                    const code = pre.querySelector('code').innerText;
+                    navigator.clipboard.writeText(code).then(() => {
+                        button.innerText = 'Copied!';
+                        setTimeout(() => {
+                            button.innerText = 'Copy';
+                        }, 2000);
+                    });
+                });
+
+                // Append to the <pre> block
+                pre.appendChild(button);
+            });
+        });
+    </script>
+</head>
+<body>
+<main class="page wide">
+
+    <a class="backlink" href="../index.html">Daniel Sabinasz</a>
+
+    <article>
+        <header class="doc-header">
+            <h1>Deep Learning From Scratch III: Training criterion</h1>
+            <div class="doc-meta">
+                Living Document · Version 1.0 · last revised 26 Aug 2017
+            </div>
+        </header>
+
+        <p>This is part 3 of a series of tutorials, in which we develop the mathematical and algorithmic underpinnings
+            of deep neural networks from scratch and implement our own neural network library in Python, mimicing the <a
+                    href="http://www.tensorflow.org">TensorFlow</a> API. Start with the first part: <a
+                    href="/deep-learning-from-scratch-i-computational-graphs/">I: Computational Graphs</a>.</p>
+        <ul>
+            <li><a href="/deep-learning-from-scratch-i-computational-graphs/">Part I: Computational Graphs</a></li>
+            <li><a href="/deep-learning-from-scratch-ii-perceptrons/">Part II: Perceptrons</a></li>
+            <li><a href="/deep-learning-from-scratch-iii-training-criterion/">Part III: Training criterion</a></li>
+            <li><a href="/deep-learning-from-scratch-iv-gradient-descent-and-backpropagation/">Part IV: Gradient Descent
+                and Backpropagation</a></li>
+            <li><a href="/deep-learning-from-scratch-v-multi-layer-perceptrons/">Part V: Multi-Layer Perceptrons</a>
+            </li>
+            <li><a href="/deep-learning-from-scratch-vi-tensorflow/">Part VI: TensorFlow</a></li>
+        </ul>
+
+        <h1 id="Training-criterion">Training criterion</h1>
+        <p>Great, so now we are able to classify points using a linear classifier and compute the probability that the
+            point belongs to a certain class, provided that we know the appropriate parameters for the weight matrix $W$
+            and bias $b$. The natural question that arises is how to come up with appropriate values for these. In the
+            red/blue example, we just looked at the training points and guessed a line that nicely separated the
+            training points. But generally we do not want to specify the separating line by hand. Rather, we just want
+            to supply the training points to the computer and let it come up with a good separating line on its own. But
+            how do we judge whether a separating line is good or bad?</p>
+        <h2 id="The-misclassification-rate">The misclassification rate</h2>
+        <p>Ideally, we want to find a line that makes as few errors as possible. For every point $x$ and class $c(x)$
+            drawn from the true but unknown data-generating distribution $p_\text{data}(x, c(x))$, we want to minimize
+            the probability that our perceptron classifies it incorrectly - the <strong>probability of
+                misclassification</strong>:</p>
+        <p>$$\underset{W, b}{\text{argmin}} p(\hat{c}(x) \neq c(x) \mid x, c(x) \, \tilde{} \, p_\text{data} )$$</p>
+        <p>Generally, we do not know the data-generating distribution $p_\text{data}$, so it is impossible to compute
+            the exact probability of misclassification. Instead, we are given a finite list of $N$ <strong>training
+                points</strong> consisting of the values of $x$ with their corresponding classes. In the following, we
+            represent the list of training points as a matrix $X \in \mathbb{R}^{N \times d}$ where each row corresponds
+            to one training point and each column to one dimension of the input space. Moreover, we represent the true
+            classes as a matrix $c \in \mathbb{R}^{N \times C}$ where $c_{i, j} = 1$ if the $i$-th training sample has
+            class $j$. Similarly, we represent the predicted classes as a matrix $\hat{c} \in \mathbb{R}^{N \times C}$
+            where $\hat{c}_{i, j} = 1$ if the $i$-th training sample has a predicted class $j$. Finally, we represent
+            the output probabilities of our model as a matrix $p \in \mathbb{R}^{N \times C}$ where $p_{i, j}$ contains
+            the probability that the $i$-th training sample belongs to the j-th class.</p>
+        <p>We could use the training data to find a classifier that minimizes the <strong>misclassification
+            rate</strong> on the training samples:</p>
+        <p>$$<br/>\underset{W, b}{\text{argmin}} \frac{1}{N} \sum_{i = 1}^N I(\hat{c}_i \neq c_i)<br/>$$</p>
+        <p>However, it turns out that finding a linear classifier that minimizes the misclassification rate is an
+            intractable problem, i.e. its computational complexity is exponential in the number of input dimensions,
+            rendering it unpractical. Moreover, even if we have found a classifier that minimizes the misclassification
+            rate on the training samples, it might be possible to make the classifier more robust to unseen samples by
+            pushing the classes further apart, even if this does not reduce the misclassification rate on the training
+            samples.</p>
+
+
+        <h2 id="Maximum-likelihood-estimation">Maximum likelihood estimation</h2>
+        <p>An alternative is to use <a href="https://en.wikipedia.org/wiki/Maximum_likelihood_estimation">maximum
+            likelihood estimation</a>, where we try to find the parameters that maximize the probability of the training
+            data:</p>
+        <div class="left_equation">\begin{align}<br/>\underset{W, b}{\text{argmax}} p(\hat{c} = c) \\<br/>\end{align}\begin{align}<br/>=
+            \underset{W, b}{\text{argmax}} \prod_{i=1}^N p(\hat{c}_i = c_i) \\<br/>\end{align}\begin{align}<br/>=
+            \underset{W, b}{\text{argmax}} \prod_{i=1}^N \prod_{j=1}^C p_{i, j}^{I(c_i = j)} \\<br/>\end{align}\begin{align}<br/>=
+            \underset{W, b}{\text{argmax}} \prod_{i=1}^N \prod_{j=1}^C p_{i, j}^{c_{i, j}} \\<br/>\end{align}\begin{align}<br/>=
+            \underset{W, b}{\text{argmax}} log \prod_{i=1}^N \prod_{j=1}^C p_{i, j}^{c_{i, j}} \\<br/>\end{align}\begin{align}<br/>=
+            \underset{W, b}{\text{argmax}} \sum_{i=1}^N \sum_{j=1}^C c_{i, j} \cdot log \, p_{i, j} \\<br/>\end{align}\begin{align}<br/>=
+            \underset{W, b}{\text{argmin}} - \sum_{i=1}^N \sum_{j=1}^C c_{i, j} \cdot log \, p_{i, j} \\<br/>\end{align}\begin{align}<br/>=
+            \underset{W, b}{\text{argmin}} J<br/>\end{align}
+        </div>
+        <p>We refer to $J = - \sum_{i=1}^N \sum_{j=1}^C c_{i, j} \cdot log \, p_{i, j}$ as the <strong>cross-entropy
+            loss</strong>. We want to minimize $J$.</p>
+        <p>We can view $J$ as yet another operation in our computational graph that takes the input data $X$, the true
+            classes $c$ and our predicted probabilities $p$ (which are the output of the $\sigma$ operation) as input
+            and computes a real number designating the loss:</p>
+        <p style="text-align: center;"><img class="aligncenter" src="img.png" style="max-width: 50%;" alt=""/></p>
+
+        <h2 id="Building-an-operation-that-computes-$J$">Building an operation that computes $J$</h2>
+        <p>We can build up $J$ from various more primitive operations. Using the element-wise matrix multiplication
+            $\odot$, we can rewrite $J$ as follows:</p>
+        <p>$$<br/>- \sum_{i=1}^N \sum_{j=1}^C (c \odot log \, p)_{i, j}<br/>$$</p>
+        <p>Going from the inside out, we can see that we need to implement the following operations:</p>
+        <ul>
+            <li>$log$: The element-wise logarithm of a matrix or vector</li>
+            <li>$\odot$: The element-wise product of two matrices</li>
+            <li>$\sum_{j=1}^C$: Sum over the columns of a matrix</li>
+            <li>$\sum_{i=1}^N$: Sum over the rows of a matrix</li>
+            <li>$-$: Taking the negative</li>
+        </ul>
+        <p>Let's implement these operations.</p>
+        <h3 id="log">log</h3>
+        <p>This computes the element-wise logarithm of a tensor.
+        </p>
+
+        <pre><code class="language-python">class log(Operation):
+    """Computes the natural logarithm of x element-wise.
+    """
+
+    def __init__(self, x):
+        """Construct log
+
+        Args:
+          x: Input node
+        """
+        super().__init__([x])
+
+    def compute(self, x_value):
+        """Compute the output of the log operation
+
+        Args:
+          x_value: Input value
+        """
+        return np.log(x_value)</code></pre>
+
+        <h3 id="multiply-/-$\odot$">multiply / $\odot$</h3>
+        <p>This computes the element-wise product of two tensors of the same shape.<br/>
+        </p>
+        <pre><code class="language-python">class multiply(Operation):
+    """Returns x * y element-wise.
+    """
+
+    def __init__(self, x, y):
+        """Construct multiply
+
+        Args:
+          x: First multiplicand node
+          y: Second multiplicand node
+        """
+        super().__init__([x, y])
+
+    def compute(self, x_value, y_value):
+        """Compute the output of the multiply operation
+
+        Args:
+          x_value: First multiplicand value
+          y_value: Second multiplicand value
+        """
+        return x_value * y_value</code></pre>
+
+        <h3 id="reduce_sum">reduce_sum</h3>
+        <p>We'll implement the summation over rows, columns, etc. in a single operation where we specify an
+            <code>axis</code>. This way, we can use the same method for all types of summations. For example, <code>axis
+                = 0</code> sums over the rows, <code>axis = 1</code> sums over the columns, etc. This is exactly what
+            <code>numpy.sum</code> does.<br/>
+        </p>
+        <pre><code class="language-python">class reduce_sum(Operation):
+    """Computes the sum of elements across dimensions of a tensor.
+    """
+
+    def __init__(self, A, axis=None):
+        """Construct reduce_sum
+
+        Args:
+          A: The tensor to reduce.
+          axis: The dimensions to reduce. If `None` (the default), reduces all dimensions.
+        """
+        super().__init__([A])
+        self.axis = axis
+
+    def compute(self, A_value):
+        """Compute the output of the reduce_sum operation
+
+        Args:
+          A_value: Input tensor value
+        """
+        return np.sum(A_value, self.axis)</code></pre>
+
+        <h3 id="negative">negative</h3>
+        <p>This computes the element-wise negative of a tensor.
+        </p>
+        <pre><code class="language-python">class negative(Operation):
+    """Computes the negative of x element-wise.
+    """
+
+    def __init__(self, x):
+        """Construct negative
+
+        Args:
+          x: Input node
+        """
+        super().__init__([x])
+
+    def compute(self, x_value):
+        """Compute the output of the negative operation
+
+        Args:
+          x_value: Input value
+        """
+        return -x_value</code></pre>
+
+        <h3 id="Putting-it-all-together">Putting it all together</h3>
+        <p>Using these operations, we can now compute $J = - \sum_{i=1}^N \sum_{j=1}^C (c \odot log \, p)_{i, j}<br/>$
+            as follows:</p>
+        <pre><code>J = negative(reduce_sum(reduce_sum(multiply(c, log(p)), axis=1)))</code></pre>
+
+        <h3 id="Example">Example</h3>
+        <p>Let's now compute the loss of our red/blue perceptron.
+        </p>
+        <pre><code class="language-python"># Create a new graph
+Graph().as_default()
+
+X = placeholder()
+c = placeholder()
+
+W = Variable([
+    [1, -1],
+    [1, -1]
+])
+b = Variable([0, 0])
+p = softmax(add(matmul(X, W), b))
+
+# Cross-entropy loss
+J = negative(reduce_sum(reduce_sum(multiply(c, log(p)), axis=1)))
+
+session = Session()
+print(session.run(J, {
+    X: np.concatenate((blue_points, red_points)),
+    c:
+        [[1, 0]] * len(blue_points)
+        + [[0, 1]] * len(red_points)
+
+}))</code></pre>
+        <p>If you have any questions, feel free to leave a comment. Otherwise, continue with the next part: <a
+                href="/deep-learning-from-scratch-iv-gradient-descent-and-backpropagation/">IV: Gradient Descent and
+            Backpropagation</a></p>
+    </article>
+
+    <footer class="site-footer">
+        © Daniel Sabinasz · <a href="../index.html">Home</a>
+    </footer>
+
+</main>
+<script>hljs.highlightAll();</script>
+</body>
+</html>

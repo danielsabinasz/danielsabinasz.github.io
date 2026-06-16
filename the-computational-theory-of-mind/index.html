@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>The Computational Theory of Mind — Daniel Sabinasz</title>
+    <meta name="description"
+          content="A historical trend in the cognitive sciences has been to understand the brain as nature’s way of implementing a computer, a view often termed the Classical Computational Theory of Mind (CCTM).">
+    <link rel="stylesheet" href="../styles.css">
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+<main class="page wide">
+
+    <a class="backlink" href="../index.html">Daniel Sabinasz</a>
+
+    <article>
+        <header class="doc-header">
+            <h1>The Computational Theory of Mind</h1>
+            <div class="doc-meta">
+                Living Document · Version 1.0 · last revised 2 Sep 2020
+            </div>
+        </header>
+
+        <p>
+            A historical trend in the cognitive sciences has been to understand the brain as nature’s way of
+            implementing a computer, a view often termed the Classical Computational Theory of Mind (CCTM).
+        </p>
+        <p>
+            Early roots of this idea can be found in the development of formal logics as a means for modeling laws of
+            reason. A formal logic is a formal language consisting of a set of symbols, rules for combining these
+            symbols into complex symbol structures, and purely syntactical rules of inference, i.e., rules that only
+            make reference to the form of the symbols rather than their meaning. Through the application of these
+            syntactical rules, true conclusions can be derived from true premises. This way, the syntax “tracks” the
+            semantics: While the rules of transformation are purely syntactical, they are defined in such a way that
+            truth is preserved across syntactical transformations – i.e., that syntactical operations satisfy semantical
+            coherence.
+        </p>
+        <p>
+            For example, a syntactical rule could be specified that allows to derive the string “The sky is blue” from
+            the string “The sky is blue and the sun is shining” due to the fact that the former is a constituent of the
+            latter. This tracks the semantic fact that the proposition denoted by “The sky is blue” follows from the
+            proposition denoted by “The sky is blue and the sun is shining”. This inference is valid, and it can be made
+            without reference to the meaning of either “The sky is blue” or “The sun is shining”. As such, formal logics
+            allow to account for reasoning processes without intrinsic reference to meaning. (For an introduction into
+            the history of using formal logics to model inferences, see my article Gödel's Incompleteness and its
+            Implications for Artificial Intelligence.)
+        </p>
+        <p>
+            Formal logics introduce a liberalism regarding the actual physical shapes of the symbols, as long as the
+            shapes are used consistently, and the rules of transformation are set up in accordance with these shapes.
+            Thus, instead of using the symbol “and” for conjunction, we could use the symbol “#”, as long as we
+            formulate the rules of inference in accordance, e.g., that the strings “A” and “B” can be derived from the
+            string “A # B”.
+        </p>
+        <p>
+            Another milestone in the development of the CCTM was the formalization of the notion of computation by
+            Turing (1936) in the form of the Turing machine, a hypothetical device that is able to execute any algorithm
+            and solve any decidable problem. Importantly, its operations consist of the transformation of symbols, and
+            these operations are sensitive to the syntactical structure (and only the syntactical structure) of those
+            symbols. In combination with the work on formal logics, this showed that it is possible to construct an
+            autonomous, syntax-driven machine whose state transitions satisfy semantical coherence – i.e., a
+            reason-respecting machine.
+        </p>
+        <p>
+            McCulloch and Pitts (1943) were among the first to suggest that the human mind is nature’s way of
+            implementing something that is similar in important respects to a Turing machine. The primary motivation for
+            this view is its ability to account for the mental in naturalistic terms, and for how reason-respecting
+            behavior can emerge from the interaction of physical matter. In the course of the 1960s, this stance was at
+            the heart of the emerging field of cognitive science. It was widely believed that many of the higher
+            cognitive functions like reasoning, decision making and problem solving are computations carried out in a
+            fashion similar to a Turing machine. Research in mathematical modeling of cognition was thus closely
+            intertwined with the emerging fields of computer science and artificial intelligence, and models of
+            cognitive processes were often given in algorithmic terms.
+        </p>
+        <p>
+            One of the claims of the CCTM, maintained, e.g., by Fodor (1975), is that sensory input gets transformed
+            into a symbolic representational format. These symbolic representations are stored and processed in systems
+            that are separate from the brain’s modal systems for perception, action and introspection. Higher cognition
+            is then the result of purely syntactical operations carried out on these symbolic representations, i.e.,
+            mechanistic operations that only make reference to the physical shape of the symbols, not to their meanings
+            (Rescorla, 2017).
+        </p>
+        <p>
+            Importantly, these symbolic representations are believed to be amodal, i.e.,
+        </p>
+        <blockquote>
+            “(1) they are arbitrarily related to their corresponding categories in the world and experience; and (2)
+            they can stand alone without grounding to perform the basic computations underlying conceptual processing”
+            (Barsalou,2016, p. 1125)
+        </blockquote>
+
+        <p>Here, grounding refers to the process by means of which a connection between a symbol and its meaning is
+            established.</p>
+
+        <p>For example, the proposition “all humans are mortal” could be encoded as the symbol string</p>
+
+        $$\forall x (\text{HUMAN}(x) \rightarrow \text{MORTAL}(x)).$$
+
+        <p>Similarly, the proposition “Socrates is a human” could be encoded as the symbol string</p>
+
+        $$\text{HUMAN}(\text{SOCRATES})$$
+
+        <p>The CCTM claims that the conclusion that “Socrates is mortal”, which human beings draw with ease, is the
+            result
+            of a process that makes reference to the syntactic properties of the symbol strings alone. For instance,
+            such a
+            process could contain a rule that whenever a statement with the syntactic form</p>
+
+        $$\forall x (\text{A}(x) \rightarrow \text{B}(x))$$
+
+        <p>for arbitrary predicate symbols $\text{A}$ and $\text{B}$ is encountered in memory, and another statement
+            with
+            the syntactic form</p>
+
+        $$\text{A}(\text{t})$$
+
+        <p>for an arbitrary term symbol $\text{t}$ is encountered in addition, then the system should produce the
+            statement</p>
+
+        $$\text{B}(\text{t}).$$
+
+        <p>This rule would lead the system to the conclusion</p>
+
+        $$\text{MORTAL}(\text{SOCRATES})$$
+
+        <p>from the premises, which states that “Socrates is mortal”. Importantly, this conclusion is drawn without any
+            reference to the meanings of the symbols. The system does not imagine Socrates, nor humanity, nor mortality.
+            It
+            simply manipulates symbols without grounding their meaning.</p>
+
+        <h2>The Language of Thought Hypothesis</h2>
+
+        <p>While the core thesis of the CCTM is that the brain implements a Turing-style computational mechanism, many
+            species of the CCTM include additional tenets. A common additional tenet is that the symbols manipulated in
+            the computations are mental representations (Pitt, 2018). A mental representation is a structure with
+            semantic properties – it represents something in the environment. Depending on one’s theory of mental
+            representations, they may represent objects, categories of objects, properties, relations, states of
+            affairs, or any combination of them. This tenet is often referred to as the Representational Theory of Mind
+            (RTM).</p>
+
+        <p>The fact that symbols have meanings is usually formalized by a meaning function μ that maps symbols to
+            meanings (Werning, 2005). For example, the symbol SWAN may represent the set of all swans in the world,
+            i.e.,</p>
+
+        $$\mu(\text{SWAN}) = \{x \; | \; x \text{ is a swan}\}.$$
+
+        <p>Another common additional tenet is that the mental representations manipulated in mental computations have a
+            part/whole constituency structure, i.e., that there are operations that allow to combine mental
+            representations into more complex mental representations, which can be combined into yet more complex mental
+            representations, etc. This is often referred to by saying that the mental representations themselves are
+            “combinatorial” (Fodor & Pylyshyn, 1988).</p>
+
+        <p>The syntactical operations that allow to combine symbols into complex symbol structures are usually
+            formalized as functions $\sigma : S^n \rightarrow S$ from a sequence of $n$ symbols into the set of symbols.
+            For instance, there might be a syntactical operation that allows to combine adjective and noun symbols into
+            a noun phrase symbol, which can be formalized as a function</p>
+
+        $$
+        \sigma_\text{AdjectiveNounCombination} : \text{A} \times \text{N} \rightarrow \text{NP},\\
+        \sigma_\text{AdjectiveNounCombination}(a, n) = a \text{ } n
+        $$
+
+        <p>from the Cartesian product of the set of all adjectives and the set of all nouns to the set of all noun
+            phrases. This syntactical rule allows, e.g., to combine the symbols BLACK and SWAN into the combinatorial
+            symbol BLACK SWAN:</p>
+
+        $$\sigma_\text{AdjectiveNounCombination}(\text{BLACK}, \text{SWAN}) = \text{BLACK SWAN}$$
+
+        <p>A third additional tenet, which goes hand in hand with the ability to combine symbols into combinatorial
+            symbols, is the Principle of Compositionality (PoC), according to which the meaning of a combinatorial
+            symbol structure is determined by the meanings of its parts and the way the parts are put together
+            syntactically (Frege, 1897; Janssen et al., 2012).</p>
+
+        <p>For example, if the meanings of adjectives and nouns are sets of objects in the world to which the adjective
+            or noun applies, then the meaning of a noun phrase may be given by the intersection of the set to which the
+            adjective applies with the set to which the noun applies:</p>
+
+        $$\mu_{\sigma_\text{AdjectiveNounCombination}}(\mu(a), \mu(n)) = \mu(a) \cap \mu(n)$$
+
+        <p>Thus, if the meaning of the adjective BLACK is the set of all black things, i.e.,</p>
+
+        $$\mu(\text{BLACK}) = \{x \; | \; x \text{ is black}\},$$
+
+        <p>and the meaning of the noun SWAN is the set of all swans, i.e.,</p>
+
+        $$\mu(\text{SWAN}) = \{x \; | \; x \text{ is a swan}\},$$
+
+        <p>then the meaning of the combinatorial symbol BLACK SWAN is the set of all black swans, i.e.,</p>
+
+        $$\begin{aligned}\mu(\text{BLACK SWAN})\\
+        = \mu_{\sigma_\text{AdjectiveNounCombination}}(\mu(\text{BLACK}), \mu(\text{SWAN}))\\
+        = \mu(\text{BLACK}) \cap \mu(\text{SWAN})\\
+        = \{x \; | \; x \text{ is black}\} \cap \{x \; | \; x \text{ is a swan}\}\\
+        = \{x \; | \; x \text{ is black and } x \text{ is a swan}\}.\end{aligned}$$
+
+        <p>The three additional tenets that (1) symbols are mental representations with (2) a part/whole constituency
+            structure that (3) fulfill the PoC are at the heart of the Language of Thought Hypothesis (LOTH), a species
+            of the CCTM put forward by Fodor (1975). An important feature of the LOTH is that the systems responsible
+            for the higher cognitive functions are encapsulated modules that are independent from and cannot penetrate
+            the sensory-motor systems (Fodor, 1983). Rather, perceptual representations are transformed into a
+            completely new representational format, which is inherently symbolic and amodal. These amodal
+            representations are fed into the systems responsible for higher cognition, and their output can be used to
+            program motor commands.</p>
+
+        <p>One of the major attractions of the LOTH and derived views has been their ability to serve as fully
+            functional conceptual systems that are able to account for many of the higher cognitive feats like memory,
+            knowledge, reasoning, language, and thought.</p>
+
+        <p>The systems of symbols on which the brain is believed to operate under the CCTM and LOTH are often referred
+            to as Amodal Symbol Systems to highlight two aspects of this view: (1) The relation between the symbols and
+            their meaning is arbitrary, i.e., the symbols attain their meaning by convention, or by their role in the
+            overall symbol system, but do not themselves resemble the objects in the world or the perceptual states that
+            produced them. (2) The symbols enter into conceptual processing without grounding them in perception
+            (Barsalou, 1999).</p>
+
+        <p>
+            In the last few decades, the CCTM has been subject to widespread criticism. For instance,
+        </p>
+        <ul>
+            <li>there is no direct empirical evidence for amodal symbols in the brain (Barsalou, 1999),</li>
+            <li>the same brain regions that are responsible for perception and action are also involved in conceptual
+                reasoning (Pulvermüller, 1999, 2005),
+            </li>
+            <li>there's no satisfactory account for how amodal symbols can get mapped back to the perceptual and motor
+                representations that gave rise to them, and for how a sense of understanding of one's reasoning can come
+                about (Harnad, 1990),
+            </li>
+            <li>the kinds of computations that neural populations can perform are significantly more limited than the
+                kinds of computations that a Turing machine can perform (Richter, Lins, Schöner, 2017)
+            </li>
+        </ul>
+
+        <h2>References</h2>
+
+        <p>Barsalou, L. W. (1999). Perceptual Symbol Systems. Behavioral and Brain Sciences, 22(4), 577–609</p>
+
+        <p>Fodor, J. A. (1975). The Language of Thought. New York, NY: Crowell</p>
+
+        <p>Fodor, J. A. (1983). The Modularity of Mind. Cambridge, MA: MIT Press</p>
+
+        <p>Fodor, J. A. & Pylyshyn, Z. W. (1988). Connectionism and cognitive architecture: A critical analysis.
+            Cognition, 28(1-2), 3–71</p>
+
+        <p>Harnad, S. (1990). The symbol grounding problem. Physica D: Nonlinear Phenomena, 42, 335–346</p>
+
+        <p>Janssen, T. M. et al. (2012). Compositionality: Its historic context. In M. Werning, W. Hinzen, & E. Machery
+            (Eds.), The Oxford Handbook of Compositionality (pp. 19–46)</p>
+
+        <p>McCulloch, W. S. & Pitts, W. (1943). A logical calculus of the ideas immanent in nervous activity. The
+            Bulletin of Mathematical Biophysics, 5 (4), 115–133</p>
+
+        <p>Pitt, D. (2018). Mental representation. In E. N. Zalta (Ed.), The Stanford Encyclopedia of Philosophy (Winter
+            2018). Metaphysics Research Lab, Stanford University</p>
+
+        <p>Pulvermüller, F. (1999). Words in the Brain’s Language. Behavioral and Brain Sciences, 22(2), 253–336</p>
+
+        <p>Pulvermüller, F. (2005). Brain mechanisms linking language and action. Nature Reviews Neuroscience, 6(July),
+            576–582</p>
+
+        <p>Richter, M., Lins, J., & Schöner, G. (2017). A neural dynamic model generates descriptions of
+            object-oriented actions. Topics in Cognitive Science, 9, 35–47</p>
+
+        <p>Turing, A. M. (1936). On computable numbers, with an application to the Entscheidungsproblem. Proceedings of
+            the London Mathematical Society, 42(2), 230–265</p>
+
+        <p>Werning, M. (2005). Right and wrong reasons for compositionality. The Compositionality of Meaning and
+            Content: Foundational Issues, 1, 285–309</p>
+
+    </article>
+
+    <footer class="site-footer">
+        © Daniel Sabinasz · <a href="../index.html">Home</a>
+    </footer>
+
+</main>
+</body>
+</html>
